@@ -1,0 +1,20 @@
+Quelle commande permet d'afficher la liste des processus en cours d'exécution?|top|ps|kill|bg|2
+Quelle commande permet d'afficher les processus de manière interactive en temps réel?|ps|jobs|top|htop|3
+Quelle commande permet de terminer un processus à partir de son PID?|stop|end|kill|exit|3
+Quel signal est envoyé par défaut par la commande kill?|SIGKILL|SIGTERM|SIGHUP|SIGSTOP|2
+Quelle commande permet d'afficher tous les processus de tous les utilisateurs?|ps -u|ps aux|ps -l|ps -e|2
+Quelle commande permet de lancer un processus en arrière-plan?|fg commande|commande &|bg commande|run commande|2
+Quelle commande permet de ramener un processus en arrière-plan au premier plan?|bg|jobs|fg|top|3
+Quelle commande permet de lister les processus en cours dans le terminal actuel?|ps|top|jobs|pstree|3
+Quelle commande permet d'afficher le PID du processus courant dans un script?|$PPID|$ID|$$|$PID|3
+Quelle commande permet de mettre en pause un processus en premier plan?|Ctrl+C|Ctrl+Z|Ctrl+D|Ctrl+S|2
+Quelle commande permet d'interrompre et terminer un processus en premier plan?|Ctrl+Z|Ctrl+D|Ctrl+C|Ctrl+X|3
+Quelle commande permet de tuer un processus de force (signal SIGKILL)?|kill -9|kill -1|kill -2|kill -15|1
+Quelle commande affiche les processus sous forme d'arborescence?|ps|top|pstree|ptree|3
+Que signifie l'acronyme PID?|Process Internal Data|Program ID|Process IDentifier|Parallel ID|3
+Quelle commande permet de connaître le PID d'un programme à partir de son nom?|ps|pidof|top|kill|2
+Quelle valeur a le PID du processus init (ou systemd)?|0|1|2|100|2
+Quelle commande permet d'afficher l'utilisation CPU et mémoire des processus?|ls|df|top|du|3
+Quelle commande permet de lancer une commande avec une priorité modifiée?|renice|nice|priority|chprio|2
+Quelle commande permet de modifier la priorité d'un processus déjà en cours?|nice|chprio|renice|setprio|3
+Quelle colonne de "ps aux" indique le pourcentage d'utilisation du CPU?|MEM|PID|%CPU|STAT|3

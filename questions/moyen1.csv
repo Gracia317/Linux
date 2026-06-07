@@ -1,0 +1,21 @@
+
+Quelle commande permet de copier un dossier et tout son contenu?|cp dossier1 dossier2|cp -r dossier1 dossier2|mv -r dossier1 dossier2|copy dossier1 dossier2|2
+
+Quelle commande permet d'afficher les fichiers cachés dans un fichier?|ls -h|ls -a|show hidden|dir /a|2
+
+Que fait la commande rm -r projet?|renomme le dossier projet|copie le dossier projet|supprime le dossier projet et son contenu|affiche le contenu du dossier projet|3
+
+Quelle commande permet de rechercher un fichier nommé note.txt dans le répertoire courant et ses sous-dossiers?|search note.txt|find . -name note.txt|grep notes.txt|locate note|3
+
+Quelle option de ls permet d'afficher les détails des fichiers?|ls -d|ls -l|ls -s|ls -p|2
+
+Que signifie la permission rw-r--r--?|Tout le monde peut écrire|Seul le propriétaire peut lire et écrire|Personne ne peut modifier le fichier|Tous utilisateurs ont tous les droits|2
+
+Quelle commande permet de modifier les permissions d'un fichiers?|chmod|chown|passwd|perm|1
+
+Que fait la commande mv fichier.txt /home/user/Documents/ ?|Supprime fichier.txt|Copie fichier.txt|Déplace fichier.txt vers le dossier Documents||3
+
+Quelle commande permet d'afficher les 10 premiers lignes d'un fichier?|tail|cat|head|top|3
+
+
+Quelle commande permet de changer le propriétaire d'un fichier?|chmod|chown|passwd|owner|2

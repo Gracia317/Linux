@@ -1,0 +1,20 @@
+
+Que signifie "rwx" sous Linux?|Read,Writte,Exexute|Run,Write,Exit|Read,Word,Execute|Remove,Write,Execute|1
+
+Quel symbole représente les permissions du propriétaire d'un fichier?|g|o|u|a|3
+
+Quelle commande permet de changer les permissions d'un fichier?|chown|chmod|ls|ps|2
+
+Que fait la permission "r"?|Exécuter un fichier|Lire un fichier|Supprimer un fichier|Renommer un fichier|2
+
+Quel numéro correspond à "rwx" en mode numérique?|644|755|777|700|d
+
+Que signifie "chmod 644 fichier?"|Tout le monde peut exécuter le fichier|Le propriétaire peut lire et écrire, les autres seulement lire|Personne ne peut lire le fichier|Le fichier est supprimé|b
+
+Quelle commande permet de changer le propriétaire d'un fichier?|chmod|chgrp|chown|usermod|3
+
+Que représente "o" dans les permissions Linux?|Owner|Others|Operator|Object|2
+
+Que fait la permission "x"?|Lire|Ecrire|Exécuter|Copier|3
+
+Quelle commande affiche les permissions d'un fichier?|ls -l|cat|pwd|mkdir|1

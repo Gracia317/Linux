@@ -1,0 +1,23 @@
+
+Que fait la commande chmod 755 script.sh?|Donne tous les droits a tout le monde|Donne lecture/écriture/exécution au propriétaire et lecture/exécution aux autres|Donne uniquement les droits d'écriture|Rend le fichier caché|2
+
+Que fait la commande tar -czf archive.tar.gz dossier/ ?|Décompresse une archive|Supprime le dossier dossier/|Crée une archive compressée du dossier|Copie le dossier vers archive.tar.gz|3
+
+Quelle commande permet de modifier les permissions de tous les fichiers .txt d'un dossier en lecture seule pour tous ?|chmod 444 *.txt|chmod 777 *.txt|chmod 111 *.txt|chmod 000 *.txt|1
+
+
+Quelle commande permet de rechercher tous les fichiers appartenant à l'utilisateur root dans /var ?|find /var -user root|grep root /var|ls -root /var|find /var -owner root|1
+
+Que fait la commande gzip fichier.txt ?|Décompresse le fichier|Crée une copie du fichier|Compresse fichier.txt en fichier.txt.gz|Convertit le fichier en binaire|3
+
+
+Quelle commande permet d'afficher mes permissions d'un fichier sous forme numérique ?|ls -n|stat fichier.txt|chmod -v|perm fichier.txt|2
+
+
+Que signifie la permission numérique 750 ?|Propriétaire: rwx, Groupe: r-x, Autres: ---|Propriétaire: rw- , Groupe: r-- , Autres: ---|Propriétaire: rwx , Groupe: rwx, Autres: ---|Propriétaire: r--  , Groupe: r-x , Autres: ---|1
+
+Quelle commande permet de changer récursuvement le propriétaire d'un dossier et de son contenu ?|chmod -R user dossier/|chown -R user dossier/|owner -R user dossier/|mv -R user dossier/|2
+
+Quelle commande permet de rechercher tout les fichiers .log modifiés il y a moins de 7 jours?|find / -name "*.log" -mtime -7|locate "*.log"|grep ".log"|ls "*.log" -7|1
+
+Quelle commande permet de trouver les fichiers vides dans le répertoire courant ?|find . -empty|ls -empty|grep empty|find . -size|1

@@ -1,0 +1,20 @@
+
+Dans "-rwxr-xr--", que représente le groupe?|rwx|r-x|r--|--x|2
+
+Que signifie "chmod 750 fichier"?|Propriétaire tout, groupe lecture/exécution, autres rien|Tout le monde peut lire|Seulement lecture pour tous|1
+
+Quelle commande change le groupe d'un fichier?|chown|chgrp|chmod|groupmod|2
+
+Que signifie "r--" en permissions Linux?|Lecture uniquement|Écriture uniquement|Éxecution uniquement|Lecture et écriture|1
+
+Que fait la commande "chmod g+w fichier"?|Retire l'écriture au propriétaire|Ajoute l'écriture au groupe|Donne tous les droits aux autres|2
+
+Quelle commande affiche les permissions sous formes détaillée?|ls|ls -l|ls -a|stat -p|2
+
+Que signifie le chiffre 4 dans les permisssions numériques?|Write|Execute|Read|Delete|3
+
+Que fait chmod o-r fichier?|Ajoute lecture au propriétaire|Retire lecture aux autres utilisateurs|Ajoute exécution au groupe|Supprime le fichier|2
+
+Que signifie "g+x" dans chmod?|Ajouter exécution au groupe|Ajouter écriture au groupe|Retirer lecture au groupe|Ajouter lecture au propriétaire|1
+
+Que représente le symbole "-" dans -rwxr-xr-x?|Répertoire|Fichier normal|Lien symbolique|Permission spécial|2

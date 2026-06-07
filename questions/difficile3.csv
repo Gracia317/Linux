@@ -1,0 +1,22 @@
+#!/bin/bash
+Dans -r--rw-r--, qui a le droit d'écriture?|Propriétaire|Groupe|Autres|Personne|2
+
+Que fait chmod a+r fichier?|Retire lecture à tous|Ajoute lecture à tous|Ajoute écriture à tous|Ajoute exécution au propriétaire|2
+
+Quelle commande donne tous les droits au propriétaire seulement?|chmod 777 fichier|chmod 700 fichier|chmod 755 fichier|chmod 744 fichier|2
+
+Dans -rwxr-----, ke groupe peut:|Lire uniquement|Écrire uniquement|Éxecuter uniquement|Rien faire|1
+
+Que signifie chmod g-w fichier?|Ajoute écriture au groupe|Retire écriture en groupe|Donne tous les droits au groume|Supprime le groupe|2
+
+Quelle est la permission numérique de -rw-r-----?|640|650|660|600|1
+
+Quelle est la permission résultante d'un fichier créé avec umask 022?|777|755|644|600|3
+
+Quelle affirmation sur umask 027 est correcte?|Donne 777 par défaut|Retire lrs droits d'exécution à tous|Empêche les autres d'avoir des droits|Rend les fichiers exécutables par défaut|3
+
+Quelle commande rend un fichier lisible uniquemeent par le propriétaire?|chmod 777 fichier|chmod 644 fichier|chmod 600 fichier|chmod 444|3
+
+Que signifie chmod 641 fichier?|rw-r----x|rw-r-----|rw-r--r--|rwxr----x|1
+
+Que fait réellement le bit setgid sur un répertoire?|Les fichiers deviennent exécutables|Les fichiers créés héritent du propriétaire|Les fichiers créés héritent du groupe du répertoire|Le répertoire devient privé|3

@@ -1,0 +1,20 @@
+Quel appel système est utilisé pour créer un nouveau processus sous Linux?|exec()|spawn()|fork()|clone()|3
+Quelle est la différence entre fork() et vfork()?|vfork() copie la mémoire du parent|vfork() suspend le parent jusqu'au exec() ou exit() de l'enfant|vfork() crée un thread|vfork() est réservé au root|2
+Quel appel système remplace l'image d'un processus par un nouveau programme?|fork()|spawn()|exec()|load()|3
+Que contient le fichier /proc/PID/maps?|Les variables d'environnement|La carte des zones mémoire mappées du processus|Les descripteurs de fichiers ouverts|Les signaux en attente|2
+Quel fichier de /proc/PID liste les descripteurs de fichiers ouverts par un processus?|/proc/PID/files|/proc/PID/fd|/proc/PID/handles|/proc/PID/open|2
+Que représente un processus zombie?|Un processus bloqué en attente I/O|Un processus dont la table de processus n'a pas été libérée par le parent|Un processus lancé sans terminal|Un processus avec priorité négative|2
+Comment un processus parent récupère-t-il le statut de sortie d'un enfant zombie?|kill()|wait() ou waitpid()|exit()|reap()|2
+Quel mécanisme Linux permet à deux processus de communiquer via un tampon en mémoire?|Socket|Pipe anonyme|Signal|Sémaphore|2
+Quelle commande affiche les appels système effectués par un processus en temps réel?|ltrace|ftrace|strace|ptrace|3
+Quelle commande trace les appels aux bibliothèques partagées d'un processus?|strace|ltrace|ftrace|ldd|2
+Quel ordonnanceur est utilisé par défaut dans le noyau Linux?|FIFO|Round-Robin|CFS (Completely Fair Scheduler)|EDF|3
+Quelle valeur de priorité temps réel (RT) est la plus haute sous Linux avec SCHED_FIFO?|0|1|99|50|3
+Quelle commande permet de changer la politique d'ordonnancement d'un processus?|chsched|renice|chrt|sched|3
+Que signifie l'état "D" dans la colonne STAT de "ps"?|Processus zombie|Processus en sommeil non interruptible (I/O)|Processus détaché|Processus en attente de signal|2
+Quel fichier /proc expose la limite du nombre de processus par utilisateur?|/proc/sys/kernel/pid_max|/proc/sys/kernel/threads-max|/proc/limits|/proc/sys/fs/proc-max|2
+Quel mécanisme Linux isole les processus en leur donnant une vue restreinte du système?|chroot|cgroups|namespaces|seccomp|3
+Quel mécanisme Linux limite les ressources (CPU, mémoire) consommées par un groupe de processus?|namespaces|cgroups|ulimit|rlimit|2
+Quelle commande permet de connaître la politique d'ordonnancement et la priorité RT d'un processus?|ps -o sched|chrt -p PID|renice -p PID|top -H|2
+Que fait l'appel système clone() par rapport à fork()?|Il est identique à fork()|Il permet de partager sélectivement l'espace mémoire, les fichiers ou le namespace|Il crée uniquement des threads POSIX|Il remplace exec()|2
+Quel signal ne peut être ni capturé, ni ignoré, ni bloqué par un processus?|SIGTERM|SIGHUP|SIGKILL|SIGSTOP|3

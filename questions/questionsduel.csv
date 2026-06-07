@@ -1,0 +1,200 @@
+Que fait la commande chmod 755 script.sh?|Donne tous les droits à tout le monde|Donne lecture/écriture/exécution au propriétaire et lecture/exécution aux autres|Donne uniquement les droits d'écriture|Rend le fichier caché|2
+Que fait la commande tar -czf archive.tar.gz dossier/?|Décompresse une archive|Supprime le dossier dossier/|Crée une archive compressée du dossier|Copie le dossier vers archive.tar.gz|3
+Quelle commande permet de modifier les permissions de tous les fichiers .txt d'un dossier en lecture seule pour tous?|chmod 444 *.txt|chmod 777 *.txt|chmod 111 *.txt|chmod 000 *.txt|1
+Quelle commande permet de rechercher tous les fichiers appartenant à l'utilisateur root dans /var?|find /var -user root|grep root /var|ls -root /var|find /var -owner root|1
+Que fait la commande gzip fichier.txt?|Décompresse le fichier|Crée une copie du fichier|Compresse fichier.txt en fichier.txt.gz|Convertit le fichier en binaire|3
+Quelle commande permet d'afficher les permissions d'un fichier sous forme numérique?|ls -n|stat fichier.txt|chmod -v|perm fichier.txt|2
+Que signifie la permission numérique 750?|Propriétaire: rwx, Groupe: r-x, Autres: ---|Propriétaire: rw-, Groupe: r--, Autres: ---|Propriétaire: rwx, Groupe: rwx, Autres: ---|Propriétaire: r--, Groupe: r-x, Autres: ---|1
+Quelle commande permet de changer récursivement le propriétaire d'un dossier et de son contenu?|chmod -R user dossier/|chown -R user dossier/|owner -R user dossier/|mv -R user dossier/|2
+Quelle commande permet de rechercher tous les fichiers .log modifiés il y a moins de 7 jours?|find / -name "*.log" -mtime -7|locate "*.log"|grep ".log"|ls "*.log" -7|1
+Quelle commande permet de trouver les fichiers vides dans le répertoire courant?|find . -empty|ls -empty|grep empty|find . -size 0|1
+Que fait la commande find . -perm 777?|Modifie les permissions à 777|Liste les fichiers ayant exactement les permissions 777|Supprime les fichiers avec les permissions 777|Cherche les fichiers sans permissions|2
+Quelle commande permet de créer un lien physique (hard link) entre deux fichiers?|ln -s fichier lien|ln fichier lien|cp --link fichier lien|link fichier lien|2
+Quelle est la différence entre un lien symbolique et un lien physique?|Il n'y a aucune différence|Le lien symbolique pointe vers l'inode, le lien physique vers le chemin|Le lien physique pointe vers le chemin, le lien symbolique vers l'inode|Le lien symbolique ne fonctionne qu'avec les dossiers|3
+Que fait la commande rsync -av source/ destination/?|Supprime les fichiers de destination|Synchronise source vers destination en préservant les attributs|Compresse source vers destination|Renomme source en destination|2
+Quelle commande affiche le numéro d'inode d'un fichier?|ls -i|stat -n|file -i|find -inode|1
+Que fait la commande chmod o-w fichier.txt?|Retire le droit d'écriture aux autres|Ajoute le droit d'écriture aux autres|Retire tous les droits aux autres|Donne tous les droits aux autres|1
+Quelle commande permet de lister les fichiers ouverts par un processus?|ls -p|lsof -p PID|find -open|ps -f|2
+Que fait la commande find . -maxdepth 1 -type f?|Liste tous les fichiers récursivement|Liste uniquement les fichiers dans le répertoire courant sans descendre dans les sous-dossiers|Liste les dossiers du répertoire courant|Cherche les fichiers de type f uniquement dans /|2
+Quelle commande permet de comparer le contenu de deux fichiers ligne par ligne?|cmp|diff fichier1 fichier2|compare fichier1 fichier2|cat fichier1 fichier2|2
+Que fait la commande chmod u+s script.sh (setuid)?|Rend le script exécutable par tous|Exécute le script avec les droits du propriétaire quel que soit l'utilisateur qui le lance|Cache le script|Supprime les droits d'exécution|2
+Quelle commande Linux permet de rechercher une chaîne de caractères dans plusieurs fichiers texte d'un dossier?|find|grep -r|chmod|touch|2
+Quelle commande Linux permet d'afficher les différences ligne par ligne entre deux fichiers texte?|diff|cmp|locate|uniq|1
+Quelle commande Linux permet d'afficher uniquement les lignes contenant un mot précis en ignorant la casse?|grep -i|cat -i|ls -a|chmod -i|1
+Quelle commande Linux permet d'afficher un fichier texte page par page dans le terminal?|less|pwd|mkdir|touch|1
+Quelle commande Linux permet d'extraire uniquement certaines colonnes d'un fichier texte structuré?|cut|split|chmod|alias|1
+Dans Vim, quel mode permet de saisir directement du texte?|Mode commande|Mode visuel|Mode insertion|Mode exécution|3
+Quelle commande Linux permet de supprimer les lignes en double dans un fichier texte trié?|uniq|grep|paste|rename|1
+Quelle commande Linux affiche le nombre de mots contenus dans un fichier texte?|wc -w|grep -w|count|cat -n|1
+Quelle commande Linux permet de rechercher récursivement un mot dans tous les fichiers d'un répertoire et d'afficher le numéro de ligne?|grep -rn|find -n|ls -r|cat -n|1
+Quelle commande Linux permet d'extraire une plage de lignes précise d'un fichier texte sans ouvrir d'éditeur?|sed -n '5,10p' fichier.txt|cut -n|grep -n|mv|1
+Quelle commande sed permet de supprimer toutes les lignes vides d'un fichier texte?|sed '/^$/d' fichier.txt|sed -e fichier.txt|sed 's/ //g' fichier.txt|sed -n fichier.txt|1
+Quelle commande awk permet d'afficher uniquement la 3ème colonne d'un fichier texte séparé par des espaces?|awk '{print $1}'|awk '{print $2}'|awk '{print $3}'|awk '{print $0}'|3
+Quelle commande permet de remplacer toutes les occurrences du mot "linux" par "Linux" dans un fichier sans ouvrir d'éditeur?|grep -r linux|sed -i 's/linux/Linux/g' fichier.txt|awk linux Linux|tr linux Linux|2
+Dans Vim, quelle commande permet de sauvegarder et quitter en même temps?|:q|:w|:wq|:x!|3
+Quelle commande permet de compter le nombre d'occurrences d'un mot dans un fichier texte?|wc -w|grep -c "mot" fichier.txt|find -count|cat -count|2
+Quelle commande permet d'afficher les lignes d'un fichier texte en ordre inverse?|sort -r|tac fichier.txt|rev fichier.txt|cat -r fichier.txt|2
+Quelle option de la commande diff permet de générer un patch entre deux fichiers?|diff -v|diff -u fichier1 fichier2|diff -r|diff -n|2
+Quelle commande permet de découper un gros fichier texte en plusieurs fichiers de 100 lignes chacun?|cut -l 100|split -l 100 fichier.txt|head -100|awk -split 100|2
+Quelle commande awk permet de calculer la somme de la 2ème colonne d'un fichier texte?|awk '{sum+=$1} END{print sum}'|awk '{sum+=$2} END{print sum}'|awk '{print $2+$2}'|awk 'sum $2'|2
+Quelle commande permet d'afficher uniquement les lignes qui ne contiennent pas un mot précis dans un fichier?|grep "mot"|grep -v "mot" fichier.txt|sed -n "mot"|find "mot"|2
+Dans "-r--rw-r--", qui a le droit d'écriture?|Propriétaire|Groupe|Autres|Personne|2
+Que fait "chmod a+r fichier"?|Retire la lecture à tous|Ajoute la lecture à tous|Ajoute l'écriture à tous|Ajoute l'exécution au propriétaire|2
+Quelle commande donne tous les droits au propriétaire seulement?|chmod 777 fichier|chmod 700 fichier|chmod 755 fichier|chmod 744 fichier|2
+Dans "-rwxr-----", que peut faire le groupe?|Lire uniquement|Écrire uniquement|Exécuter uniquement|Rien faire|1
+Que signifie "chmod g-w fichier"?|Ajoute l'écriture au groupe|Retire l'écriture au groupe|Donne tous les droits au groupe|Supprime le groupe|2
+Quelle est la permission numérique de "-rw-r-----"?|640|650|660|600|1
+Quelle est la permission par défaut d'un fichier créé avec un umask 022?|777|755|644|600|3
+Quelle affirmation sur l'umask 027 est correcte pour un répertoire créé?|Donne les droits 777 par défaut|Retire les droits d'exécution à tous|Empêche les "autres" d'avoir le moindre droit|Rend les fichiers exécutables par défaut|3
+Quelle commande rend un fichier lisible uniquement par le propriétaire?|chmod 777 fichier|chmod 644 fichier|chmod 600 fichier|chmod 444 fichier|3
+Que signifient les permissions "chmod 641 fichier" sous forme textuelle?|rw-r----x|rw-r-----|rw-r--r--|rwxr-xr-x|1
+Que signifie le droit spécial SUID (Set User ID) activé sur un fichier exécutable?|Le fichier ne peut être exécuté que par root|Le fichier s'exécute avec les privilèges du propriétaire du fichier|Le fichier est partagé entre tous les utilisateurs|Le fichier change de propriétaire automatiquement|2
+Comment se traduit visuellement le Sticky Bit activé sur les droits d'un répertoire ("ls -l")?|Un "s" à la place du "x" des autres|Un "t" ou "T" à la fin des permissions des autres|Un "+" à la fin de la ligne|Une lettre "S" majuscule au début|2
+Quelle commande permet de configurer une ACL (Access Control List) spécifique pour un utilisateur sur un fichier?|chmod|chown|setfacl|getfacl|3
+Si le Sticky Bit est activé sur un répertoire (ex: /tmp), qui peut supprimer un fichier à l'intérieur?|N'importe quel utilisateur ayant le droit d'écriture|Seulement le propriétaire du fichier, le propriétaire du répertoire ou root|Uniquement l'administrateur root|Seulement les membres du groupe du répertoire|2
+Quelle valeur numérique en notation octale attribue le droit SUID et les permissions 755?|4755|2755|1755|7755|1
+Que signifie un "s" minuscule (au lieu d'un "S" majuscule) pour le SGID dans les permissions du groupe (ex: rwxr-sr-x)?|Le droit SGID est actif mais le droit d'exécution 'x' du groupe est absent|Le droit SGID est actif et le droit d'exécution 'x' du groupe est également présent|Le SGID est invalide sur ce type de fichier|Le fichier est verrouillé par le système|2
+Quelle est la permission par défaut d'un NOUVEAU RÉPERTOIRE si l'umask global est configuré à 077?|777|700|600|755|2
+Lorsqu'un répertoire possède le droit SGID (Set Group ID), quel est son effet sur les nouveaux fichiers créés dedans?|Ils héritent automatiquement du groupe propriétaire du répertoire parent|Ils deviennent exécutables par tout le groupe|Ils reçoivent automatiquement le droit SUID|Ils sont cachés pour les autres membres du groupe|1
+Que signifie le caractère "+" visible à la fin des permissions dans "-rw-r--r--+"?|Le fichier possède une permission spéciale SUID|Une ACL (Access Control List) est configurée sur ce fichier|Le fichier est compressé|Le fichier possède des attributs étendus de type chattr|2
+Quelle valeur d'umask permet de s'assurer que les nouveaux fichiers ont les droits "rw-r-----" (640) par défaut?|022|027|037|000|2
+Quelle commande permet de copier un dossier et tout son contenu?|cp dossier1 dossier2|cp -r dossier1 dossier2|mv -r dossier1 dossier2|copy dossier1 dossier2|2
+Quelle commande permet d'afficher les fichiers cachés dans un répertoire?|ls -h|ls -a|show hidden|dir /a|2
+Que fait la commande rm -r projet?|Renomme le dossier projet|Copie le dossier projet|Supprime le dossier projet et son contenu|Affiche le contenu du dossier projet|3
+Quelle commande permet de rechercher un fichier nommé note.txt dans le répertoire courant et ses sous-dossiers?|search note.txt|find . -name note.txt|grep note.txt|locate note|2
+Quelle option de ls permet d'afficher les détails des fichiers?|ls -d|ls -l|ls -s|ls -p|2
+Que signifie la permission rw-r--r--?|Tout le monde peut écrire|Seul le propriétaire peut lire et écrire|Personne ne peut modifier le fichier|Tous les utilisateurs ont tous les droits|2
+Quelle commande permet de modifier les permissions d'un fichier?|chmod|chown|passwd|perm|1
+Que fait la commande mv fichier.txt /home/user/Documents/?|Supprime fichier.txt|Copie fichier.txt|Déplace fichier.txt vers le dossier Documents|Renomme fichier.txt|3
+Quelle commande permet d'afficher les 10 premières lignes d'un fichier?|tail|cat|head|top|3
+Quelle commande permet de changer le propriétaire d'un fichier?|chmod|chown|passwd|owner|2
+Quelle commande permet de connaître l'espace disque utilisé par un dossier?|df -h|du -sh dossier|ls -l|free -h|2
+Que fait la commande ln -s fichier.txt lien.txt?|Copie fichier.txt en lien.txt|Crée un lien symbolique vers fichier.txt|Renomme fichier.txt en lien.txt|Supprime fichier.txt|2
+Quelle commande permet d'afficher l'espace disque disponible sur les partitions?|du -h|df -h|free|lsblk|2
+Que fait la commande chmod 755 script.sh?|Supprime le fichier|Donne tous les droits au propriétaire et lecture+exécution aux autres|Rend le fichier invisible|Change le propriétaire du fichier|2
+Quelle commande permet de compresser un dossier en archive .tar.gz?|zip -r archive dossier|tar -czvf archive.tar.gz dossier|gzip dossier|compress dossier|2
+Quelle commande permet d'extraire une archive .tar.gz?|tar -czvf archive.tar.gz|unzip archive.tar.gz|tar -xzvf archive.tar.gz|gunzip -r archive.tar.gz|3
+Que fait la commande find / -size +100M?|Cherche les fichiers de moins de 100 Mo|Cherche les fichiers de plus de 100 Mo|Supprime les fichiers de plus de 100 Mo|Affiche la taille du disque|2
+Quelle commande affiche le type d'un fichier (texte, binaire, etc.)?|type|file|cat|ls -t|2
+Que fait la commande touch fichier.txt si fichier.txt existe déjà?|Le supprime|Le copie|Met à jour sa date de modification|Affiche son contenu|3
+Quelle commande permet de trier le contenu d'un fichier texte par ordre alphabétique?|grep|awk|sort|sed|3
+Quelle commande permet de compter le nombre de lignes dans un fichier texte?|grep|wc -l|cat|touch|2
+Quelle commande Linux permet de remplacer un mot par un autre dans un fichier texte?|grep|sed 's/ancien/nouveau/g' fichier.txt|awk|tr|2
+Quel raccourci clavier permet d'annuler la dernière action dans un traitement de texte?|Ctrl + Y|Ctrl + U|Ctrl + Z|Ctrl + P|3
+Quel outil Linux est utilisé pour éditer des fichiers texte en ligne de commande de manière avancée?|Vim|Firefox|Calc|Gedit Music|1
+Quelle commande Linux permet d'afficher les 10 premières lignes d'un fichier texte?|tail|head|sort|pwd|2
+Quelle commande Linux permet d'afficher les dernières lignes d'un fichier texte?|head|tail|less|pwd|2
+Quel raccourci clavier permet de rechercher un mot dans un document?|Ctrl + H|Ctrl + B|Ctrl + F|Ctrl + L|3
+Quelle extension correspond généralement à un document Microsoft Word compatible avec Linux?|.docx|.html|.iso|.tar|1
+Quel éditeur graphique est souvent installé sous Linux?|Gedit|Excel|Outlook|Paint|1
+Quelle commande permet de trier les lignes d'un fichier texte par ordre alphabétique?|grep|cat|sort fichier.txt|wc|3
+Quelle commande Linux permet de supprimer les lignes en double dans un fichier texte?|sort|uniq|grep -d|sed -d|2
+Quelle commande permet d'afficher uniquement les lignes contenant le mot "erreur" dans un fichier?|cat|grep "erreur" fichier.txt|find "erreur"|awk "erreur"|2
+Quelle commande permet de remplacer toutes les tabulations par des espaces dans un fichier?|sed|expand fichier.txt|tr '\t' ' ' fichier.txt|awk|2
+Comment afficher le nombre de mots, lignes et caractères d'un fichier en une seule commande?|wc fichier.txt|count fichier.txt|stat fichier.txt|ls -l fichier.txt|1
+Quelle commande permet de fusionner deux fichiers texte côte à côte (colonne par colonne)?|cat|join|paste fichier1.txt fichier2.txt|merge|3
+Quelle commande Linux permet d'afficher un fichier texte page par page dans le terminal?|cat|head|less fichier.txt|tail|3
+Quelle option de grep permet d'ignorer la casse lors d'une recherche?|grep -v|grep -n|grep -i|grep -r|3
+Quelle commande permet d'afficher les numéros de ligne d'un fichier texte?|cat -n fichier.txt|ls -n|wc -l|head -n|1
+Quelle commande permet d'extraire uniquement la 2ème colonne d'un fichier CSV séparé par des virgules?|awk|cut -d',' -f2 fichier.csv|grep -f2|sed -f2|2
+Quelle commande permet de convertir un fichier texte en majuscules?|upper fichier.txt|tr '[:lower:]' '[:upper:]' < fichier.txt|sed -u fichier.txt|awk -upper fichier.txt|2
+Dans "-rwxr-xr--", que représente le groupe?|rwx|r-x|r--|--x|2
+
+Que signifie "chmod 755 fichier"?|Propriétaire tout, groupe lecture/exécution, autres lecture/exécution|Tout le monde peut lire|Seulement lecture pour tous|Propriétaire lecture, groupe tout, autres rien|1
+
+Quelle commande change le groupe d'un fichier?|chown|chgrp|chmod|groupmod|2
+
+Que signifie "r--" en permissions Linux?|Lecture uniquement|Écriture uniquement|Exécution uniquement|Lecture et écriture|1
+
+Que fait la commande "chmod g+w fichier"?|Retire l'écriture au propriétaire|Ajoute l'écriture au groupe|Donne tous les droits aux autres|Retire l'exécution au groupe|2
+
+Quelle commande affiche les permissions sous forme détaillée?|ls|ls -l|ls -a|stat -p|2
+
+Que signifie le chiffre 4 dans les permissions numériques?|Écriture (w)|Exécution (x)|Lecture (r)|Suppression (d)|3
+
+Que fait chmod o-r fichier?|Ajoute lecture au propriétaire|Retire la lecture aux autres utilisateurs|Ajoute exécution au groupe|Supprime le fichier|2
+
+Que signifie "g+x" dans chmod?|Ajouter l'exécution au groupe|Ajouter l'écriture au groupe|Retirer la lecture au groupe|Ajouter la lecture au propriétaire|1
+
+Que représente le symbole "-" au tout début de -rwxr-xr-x?|Répertoire|Fichier normal|Lien symbolique|Permission spéciale|2
+
+Quelle est la valeur numérique des permissions "rwxr-xr-x"?|755|644|700|777|1
+
+Que signifie la permission "w" (écriture) sur un répertoire?|Modifier le texte des fichiers|Créer et supprimer des fichiers dans ce répertoire|Changer le propriétaire du répertoire|Exécuter les scripts du répertoire|2
+
+Si un fichier a les permissions 640, que peuvent faire les "autres" (others)?|Lire le fichier|Modifier le fichier|Rien du tout|Exécuter le fichier|3
+
+Quelle commande permet de modifier à la fois le propriétaire et le groupe d'un fichier?|chgrp|chmod|chown|umask|3
+
+Que fait la commande "chmod u+x,g-w fichier"?|Ajoute l'exécution au propriétaire et retire l'écriture au groupe|Ajoute l'écriture au propriétaire et retire l'exécution au groupe|Donne tous les droits au groupe|Rend le fichier invisible|1
+
+Quelle valeur numérique correspond aux droits "rw-rw-r--"?|664|644|755|442|1
+
+Quelle commande permet de définir les permissions par défaut lors de la création d'un fichier?|chmod|chown|umask|setfacl|3
+
+Que représente la lettre "d" au tout début d'une ligne dans "ls -l"?|Un fichier de données (data)|Un répertoire (directory)|Un fichier supprimé (deleted)|Un lien direct|2
+
+Si un utilisateur n'a pas le droit d'exécution "x" sur un répertoire, que se passe-t-il?|Il ne peut pas lire les fichiers|Il ne peut pas entrer dans le répertoire avec la commande cd|Il ne peut pas supprimer le répertoire|Il peut quand même exécuter les scripts à l'intérieur|2
+
+Que signifie le chiffre 2 dans les permissions numériques?|Lecture (r)|Écriture (w)|Exécution (x)|Aucun droit|2
+Quelle commande permet d'afficher le contenu d'un répertoire sous Linux?|pwd|ls|cd|mkdir|2
+Quelle commande permet de créer un nouveau dossier?|touch|rm|mkdir|cp|3
+Quelle commande permet de créer un fichier vide?|touch|mv|cat|pwd|1
+Quelle commande permet de supprimer un fichier?|delete|erase|rm|del|3
+Quelle commande permet de copier un fichier?|mv|cp|copy|clone|2
+Quelle commande permet de déplacer ou renommer un fichier?|mv|cp|rm|pwd|1
+Quelle commande affiche le chemin du répertoire courant?|where|ls|pwd|cd|3
+Quelle commande permet de changer de répertoire?|mv|cd|dir|pwd|2
+Quelle commande permet d'afficher le contenu d'un fichier texte?|cat|show|open|read|1
+Quelle commande permet de supprimer un dossier vide?|rmdir|rmfile|deletedir|mkdir|1
+Quelle commande permet de lister les fichiers cachés d'un répertoire?|ls -a|ls -l|ls -h|ls -r|1
+Quelle commande permet de copier un dossier entier avec son contenu?|cp|cp -r|copy -r|mv -r|2
+Quelle commande permet d'afficher les détails d'un fichier (permissions, taille)?|ls -l|ls -a|cat|pwd|1
+Quelle commande permet de renommer un fichier "old.txt" en "new.txt"?|cp old.txt new.txt|rm old.txt|mv old.txt new.txt|touch new.txt|3
+Quelle commande permet de supprimer un dossier non vide?|rmdir|rm -r|rm -f|deletedir|2
+Quelle commande permet d'afficher les 10 premières lignes d'un fichier?|tail|head|cat|less|2
+Quelle commande permet d'afficher les 10 dernières lignes d'un fichier?|head|more|tail|cat|3
+Quelle commande permet de rechercher un fichier par son nom?|grep|locate|find|search|3
+Quelle commande permet de connaître la taille d'un fichier ou dossier?|ls|du|df|size|2
+Quelle commande permet de créer plusieurs dossiers imbriqués en une seule commande?|mkdir -p|mkdir -r|mkdir -a|mkdir -f|1
+Quel raccourci clavier permet de sélectionner tout le texte dans un document?|Ctrl + S|Ctrl + A|Ctrl + N|Ctrl + T|2
+Quel logiciel est souvent utilisé pour le traitement de texte sous Linux?|Photoshop|LibreOffice Writer|VLC|GIMP|2
+Quel raccourci clavier permet de copier du texte?|Ctrl + X|Ctrl + V|Ctrl + C|Ctrl + Z|3
+Quel raccourci clavier permet de coller du texte?|Ctrl + V|Ctrl + P|Ctrl + S|Ctrl + D|1
+Quelle commande Linux permet d'afficher le contenu d'un fichier texte?|mkdir|cat|rm|pwd|2
+Quel logiciel en mode terminal permet de modifier un fichier texte facilement?|Firefox|Nano|Steam|Calculator|2
+Quelle commande Linux permet de rechercher un mot dans un fichier texte?|grep|chmod|sudo|clear|1
+Quel raccourci clavier permet d'enregistrer un document?|Ctrl + E|Ctrl + S|Ctrl + R|Ctrl + W|2
+Quelle commande Linux affiche la liste des fichiers d'un dossier?|cd|ls|echo|mv|2
+Quel format est souvent utilisé pour exporter un document non modifiable?|.mp4|.pdf|.png|.zip|2
+Quelle commande Linux permet de compter le nombre de lignes d'un fichier texte?|count|wc -l|ls -l|cat -n|2
+Quel raccourci clavier permet d'annuler une action dans un éditeur de texte?|Ctrl + Y|Ctrl + S|Ctrl + Z|Ctrl + X|3
+Quelle commande Linux permet d'afficher les premières lignes d'un fichier texte?|tail|head|cat|less|2
+Quelle commande Linux permet d'afficher les dernières lignes d'un fichier texte?|head|more|tail|cat|3
+Quel éditeur de texte graphique est populaire sous Linux?|Notepad|gedit|Wordpad|TextEdit|2
+Quelle commande permet d'écrire du texte dans un nouveau fichier depuis le terminal?|cat > fichier.txt|rm fichier.txt|mv fichier.txt|ls > fichier.txt|1
+Quel raccourci clavier permet de couper du texte?|Ctrl + C|Ctrl + X|Ctrl + V|Ctrl + Z|2
+Quelle commande Linux affiche le nombre de mots dans un fichier texte?|wc -l|wc -w|count -w|grep -w|2
+Comment ouvrir un fichier texte avec Nano dans le terminal?|nano fichier.txt|open fichier.txt|edit fichier.txt|read fichier.txt|1
+Quelle commande permet de concaténer deux fichiers texte et afficher le résultat?|merge|cat fichier1.txt fichier2.txt|join fichier1.txt fichier2.txt|paste fichier1.txt fichier2.txt|2
+Que signifie "rwx" sous Linux?|Read, Write, Execute|Run, Write, Exit|Read, Word, Execute|Remove, Write, Execute|1
+Quel symbole représente les permissions du propriétaire d'un fichier?|g|o|u|a|3
+Quelle commande permet de changer les permissions d'un fichier?|chown|chmod|ls|ps|2
+Que fait la permission "r"?|Exécuter un fichier|Lire un fichier|Supprimer un fichier|Renommer un fichier|2
+Quel numéro correspond à la permission "rwx" en mode numérique?|644|755|777|7|4
+Que signifie "chmod 644 fichier"?|Tout le monde peut exécuter le fichier|Le propriétaire peut lire et écrire, les autres seulement lire|Personne ne peut lire le fichier|Le fichier est supprimé|2
+Quelle commande permet de changer le propriétaire d'un fichier?|chmod|chgrp|chown|usermod|3
+Que représente "o" dans les permissions Linux?|Owner|Others|Operator|Object|2
+Que fait la permission "x"?|Lire|Écrire|Exécuter|Copier|3
+Quelle commande affiche les permissions d'un fichier?|ls -l|cat|pwd|mkdir|1
+Que signifie la permission "w"?|Exécuter un fichier|Lire un fichier|Écrire dans un fichier|Supprimer un fichier|3
+Que représente "g" dans les permissions Linux?|General|Guest|Group|Global|3
+Combien de catégories d'utilisateurs existent dans les permissions Linux?|1|2|3|4|3
+Que représente le tiret "-" dans les permissions d'un fichier (ex: rw-r--r--)?|Un droit accordé|Un droit refusé|Un fichier caché|Un lien symbolique|2
+Quel numéro correspond à la permission "r" (lecture seule) en mode numérique?|1|2|3|4|4
+Quel numéro correspond à la permission "w" (écriture) en mode numérique?|1|2|3|4|2
+Que signifie "chmod 777 fichier"?|Seul le propriétaire a tous les droits|Personne n'a de droits|Tout le monde a tous les droits|Le fichier est supprimé|3
+Que représente "u" dans les permissions Linux?|User (propriétaire)|Unix|Unknown|Upload|1
+Quel est le premier caractère affiché par "ls -l" pour un répertoire?|r|d|-|x|2
+Que signifie "chmod 400 fichier"?|Seul le propriétaire peut lire le fichier|Tout le monde peut lire le fichier|Le propriétaire peut écrire dans le fichier|Le fichier est exécutable par tous|1
+

@@ -1,0 +1,21 @@
+
+Quelle commande permet de compter le nombre de lignes dans un ficher texte ?|grep|wc -l|cat|touch|2
+
+
+Quelle commande Linux permet de modifier les permissions d'un fichier?|passwd|chmod|ps|uname|2
+
+Quel raccourci clavier permet d'annuler la dernière action dans un traitement de texte?|Ctrl + Y|Ctrl + U|Ctrl + Z|Ctrl + P|3
+
+Quel outil Linux est utilisé pour éditer des fichiers texte en ligne de commande de manière avancée?|Vim|Firefox|Calc|Gedit Music|1
+
+Quelle commande Linux permet d'afficher les 10 premiers lignes d'un fichier texte?|tail|head|sort|pwd|2
+
+Quelle commande Linux permet d'afficher les dernières lignes d'un fichier texte ?|head|tail|less|pwd|2
+
+Quel raccourci clavier permet de rechercher un mot dans un document ?|Ctrl + H|Ctrl + B|Ctrl + F|Ctrl +L|3
+
+Quelle commande Linux affiche le chemin actuel du dossier de travail ?|pwd|where|dir|path|1
+
+Quelle extension correspond généralement a un document Microsoft Word compatible avec Linux?|.docx|.html|.iso|.tar|1
+
+Quel éditeur graphique est souvent installé  sous Linux ?|Gedit|Excel|Outlook|Paint|1

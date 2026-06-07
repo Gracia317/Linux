@@ -1,0 +1,9 @@
+gestion_niveau1=0
+gestion_niveau2=verrou      
+gestion_niveau3=verrou
+texte_niveau1=0
+texte_niveau2=verrou
+texte_niveau3=verrou
+droits_niveau1=0
+droits_niveau2=verrou
+droits_niveau3=verrou

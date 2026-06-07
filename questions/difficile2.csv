@@ -1,0 +1,20 @@
+
+Quelle commande Linux permet de rechercher une chaîne de caractères dans plusieurs fichiers texte d'un dossier?|find|grep -r|chmod|touch|2
+
+Quelle commande Linux permet d'afficher les différences lignes par lignes entre deux fichiers texte?|diff|cmp|locate|uniq|1
+
+Quelle commande Linux permet d'afficher uniquement les lignes contenant un mot précis et d'ignorer la casse?|grep -i|cat -i|ls -a|chmod -i|1
+
+Quelles commandes Linux permet d'afficher un fichier texte page par page dans le terminal?|less|pwd|mkdir|touch|1
+
+Quelle commande Linux permet d'extraire uniquement certaines colonnes d'un fichier texte structuré?|cut|split|chmod|alias|1
+
+Dans Vim, quel mode permet de saisir ditrctement du texte ?|Mode commande|Mode visuel|Mode insertion|Mode exécution|3
+
+Quelle commande Linux permet de supprimer les lignes en doubles dans un fichier texte trié?|uniq|grep|paste|rename|1
+
+Quelle commande Linux affiche le nombre de mots contenus dans un fichier texte?|wc -w|grep -w|count|cat -n|1
+
+Quelles commande Linux permet de rechercher récursivement un mot dans tous les fichiers texte d'un répertoire et d'afficher le numéro de ligne?|grep -rn|find -n|ls -r|cat -n|1
+
+Quelle commande Linux permet d'extraire une page de lignes précise d'un fichier texte sans ouvrir d'éditeur?|sed|cut|grep|mv|1

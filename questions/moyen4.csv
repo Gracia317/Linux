@@ -1,0 +1,20 @@
+Quelle commande permet d'afficher les processus d'un utilisateur spécifique?|ps -u username|ps -a username|top -u username|pgrep -u username|1
+Quelle option de "ps" affiche les processus sous forme de hiérarchie (forêt)?|ps -t|ps --forest|ps -H|ps -e|2
+Quelle commande permet de tuer tous les processus portant un nom donné?|kill -name|pkill|killall -n|killname|2
+Quelle est la plage de valeurs de "nice" pour définir la priorité d'un processus?|-20 à 19|-99 à 99|0 à 100|-10 à 10|1
+Quelle valeur de "nice" correspond à la priorité la plus haute?|-20|0|19|-1|1
+Quelle commande affiche uniquement les PIDs des processus correspondant à un nom?|ps -name|pidof / pgrep|top -p|kill -l|2
+Que représente la colonne "STAT" dans la sortie de "ps aux"?|La taille mémoire|Le statut du processus|Le temps CPU utilisé|Le terminal associé|2
+Que signifie l'état "Z" dans la colonne STAT de "ps"?|Processus en attente|Processus zombie|Processus stoppé|Processus en veille|2
+Que signifie l'état "S" dans la colonne STAT de "ps"?|Processus stoppé|Processus en cours d'exécution|Processus en sommeil interruptible|Processus système|3
+Quel signal permet de demander à un processus de recharger sa configuration?|SIGKILL|SIGTERM|SIGHUP|SIGSTOP|3
+Quel signal arrête (suspend) un processus sans le tuer?|SIGTERM|SIGKILL|SIGSTOP|SIGCONT|3
+Quel signal reprend l'exécution d'un processus suspendu?|SIGSTOP|SIGCONT|SIGTERM|SIGHUP|2
+Quelle commande permet d'envoyer un signal à tous les processus d'un groupe?|kill -g|kill -- -PGID|pkill -g|killall|2
+Quelle variable d'environnement contient le PID du processus parent?|$$|$PID|$PPID|$PARENTPID|3
+Quel fichier dans /proc contient les informations sur un processus de PID 1234?|/proc/1234/info|/proc/1234/status|/proc/status/1234|/proc/1234/data|2
+Quelle commande surveille en temps réel les ressources système avec plus de détails que top?|ps aux|glances|watch ps|strace|2
+Quelle commande permet de voir les fichiers ouverts par un processus?|fstat|lsof -p PID|openfiles|ls /proc/PID|2
+Quelle commande permet d'exécuter un processus en l'immunisant contre le signal SIGHUP?|disown|nohup|immune|noterm|2
+Quelle commande permet de dissocier un processus du terminal après son lancement?|nohup|disown|detach|bg|2
+Dans quel répertoire le noyau Linux expose-t-il les informations sur les processus?|/sys|/run|/proc|/dev|3
