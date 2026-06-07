@@ -1,3 +1,0 @@
-07/06/2026 16:30 | gracia | Gestion de fichiers | niveau1 | 100
-07/06/2026 16:31 | gracia | Gestion de fichiers | niveau2 | 100
-07/06/2026 16:32 | gracia | Gestion de fichiers | niveau3 | 80
