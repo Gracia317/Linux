@@ -1,9 +1,10 @@
-#-PROJET LINUX Groupe: Kanto, Gracia, Sarobidy, Sambatra
-#-MasterLin
+**_PROJET LINUX Groupe: Kanto, Gracia, Sarobidy, Sambatra_**
+**MasterLin
 Un quiz sous 4 modules
 Logins, verrouillage niveau, fichiers protégés des historiques et progressions de chaque joueur
 Mode solo, mode duel et mode assistant
 Mode assist: Une partie solo et si besoin d'un coup de pouce: appel d'un ami connecté
-#-Comment
+**Comment
 shell, nc, socket C, zenity
-#-Demo
+**Demo
+(ongoing)
