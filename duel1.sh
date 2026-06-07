@@ -300,7 +300,7 @@ quiz_duel_client()
         # Lire la réponse de B
         local reponse_B=""
         read -rp "Votre réponse (1-4) ou 'q' pour quitter: " reponse_B </dev/tty
-        while [[ "$reponse_A" != [1-4] && "$reponse_A" != "q" ]]; do
+        while [[ "$reponse_B" != [1-4] && "$reponse_B" != "q" ]]; do
             read -rp "Invalide. Tapez (1-4) ou 'q' : " reponse_A </dev/tty
         done
         
@@ -374,17 +374,26 @@ afficher_resultat_final()
     echo "  Joueur A : $score_A / $total"
     echo "  Joueur B : $score_B / $total"
     echo ""
+    
+    local verdict=""
+    
     if [ "$score_A" -gt "$score_B" ]; then
         echo "  🏆 VICTOIRE de A !"
+        verdict="VICTOIRE A"
     elif [ "$score_B" -gt "$score_A" ]; then
         echo "  🏆 VICTOIRE de B !"
+        verdict="VICTOIRE B"
     else
         echo "  🤝 ÉGALITÉ !"
+        verdict="EGALITE"
     fi
+    
+
+    # Écrire dans l'historique duel
+    echo "$(date '+%d/%m/%Y %H:%M') | $prenom | A:$score_A B:$score_B sur $total | $verdict" \
+        >> MasterLin/historique_duel.txt
+
+
     echo ""
     read -rp "Appuyez sur ENTREE pour revenir au menu..." _ </dev/tty
 }
- 
-
- 
-
