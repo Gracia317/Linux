@@ -65,6 +65,19 @@ compiler_duel()
     fi
     return 0
 }
+
+nettoyage_duel()
+{
+    kill "$SERVEUR_PID"  2>/dev/null
+    kill "$CLIENT_A_PID" 2>/dev/null
+    kill "$CLIENT_B_PID" 2>/dev/null
+    wait "$SERVEUR_PID"  2>/dev/null
+    wait "$CLIENT_A_PID" 2>/dev/null
+    wait "$CLIENT_B_PID" 2>/dev/null
+    rm -f /tmp/duel_qstA_*_$$ /tmp/duel_repA_*_$$
+    rm -f /tmp/duel_qstB_*_$$ /tmp/duel_repB_*_$$
+    rm -f /tmp/duel_srv_$$.log
+}
  
 # ================================================================
 # JOUEUR A — SERVEUR
@@ -150,7 +163,7 @@ quiz_duel_serveur()
         # Afficher la question à A
         clear
         echo "=== Question $numeroquest/$total ==="
-        echo "(Score → A : $score_A  |  B : $score_B)"
+        echo "(Score => A : $score_A  |  B : $score_B)"
         echo ""
         echo " $question"
         echo "  [1] $C1"
@@ -161,10 +174,16 @@ quiz_duel_serveur()
  
         # Lire la réponse de A
         local reponse_A=""
-        read -rp "Votre réponse (1-4) : " reponse_A </dev/tty
-        while [[ "$reponse_A" != [1-4] ]]; do
-            read -rp "Invalide. Tapez (1-4) : " reponse_A </dev/tty
+        read -rp "Votre réponse (1-4) ou 'q' pour quitter : " reponse_A </dev/tty
+        while [[ "$reponse_A" != [1-4] && "$reponse_A" != "q" ]]; do
+            read -rp "Invalide. Tapez (1-4) ou 'q' : " reponse_A </dev/tty
         done
+
+        if [ "$reponse_A" = "q" ]; then
+            echo "Abandon du duel."
+             nettoyage_duel
+            return 0
+        fi
  
         # Écrire la réponse → client1 la lit et l'envoie au serveur
         echo "$reponse_A" > "$tmp_rep"
@@ -205,6 +224,11 @@ quiz_duel_serveur()
         if [ $numeroquest -lt $total ]; then
             echo ""
             read -rp "Appuyez sur ENTREE pour la suite..." </dev/tty
+            if [ "$_continuer" = "q" ]; then
+                echo "Abandon du duel."
+                nettoyage_duel
+                return 0
+            fi
         fi
  
         numeroquest=$((numeroquest + 1))
@@ -275,10 +299,16 @@ quiz_duel_client()
  
         # Lire la réponse de B
         local reponse_B=""
-        read -rp "Votre réponse (1-4) : " reponse_B </dev/tty
-        while [[ "$reponse_B" != [1-4] ]]; do
-            read -rp "Invalide. Tapez (1-4) : " reponse_B </dev/tty
+        read -rp "Votre réponse (1-4) ou 'q' pour quitter: " reponse_B </dev/tty
+        while [[ "$reponse_A" != [1-4] && "$reponse_A" != "q" ]]; do
+            read -rp "Invalide. Tapez (1-4) ou 'q' : " reponse_A </dev/tty
         done
+        
+        if [ "$reponse_B" = "q" ]; then
+            echo "Abandon du duel."
+            nettoyage_duel
+            return 0
+        fi
  
         # Écrire la réponse → client1 la lit et l'envoie
         echo "$reponse_B" > "$tmp_rep"
@@ -318,6 +348,11 @@ quiz_duel_client()
         if [ $numeroquest -lt $total ]; then
             echo ""
             read -rp "Appuyez sur ENTREE pour la suite..." </dev/tty
+            if [ "$_continuer" = "q" ]; then
+                echo "Abandon du duel."
+                nettoyage_duel
+                return 0
+            fi
         fi
  
         numeroquest=$((numeroquest + 1))   # ← avance seulement si round réussi
@@ -349,5 +384,7 @@ afficher_resultat_final()
     echo ""
     read -rp "Appuyez sur ENTREE pour revenir au menu..." _ </dev/tty
 }
+ 
+
  
 
