@@ -1,18 +1,45 @@
 #!/bin/bash
 #script bash du jeu
 
-source ./outil2.sh	#notif et bare de chargement
 source ./score.sh	#contient les fichier de progressions, et score etc;;;
-source ./duel1.sh    #contient compile_duel et affiche_duel
+source ./Outil.sh	# port et ip, barre de chargem et notif, notif, checknmap, installation nmap, nc
+source ./Menu.sh
+source ./assist.sh
+source ./duel1.sh
 SERVEUR_DUEL="./serveur1"
 CLIENT_DUEL="./client1"
 PORT_DUEL=8080
-PORT_HISTORIQUE=8081
 
+if [ "$EUID" -ne 0 ]; then
+    echo "Erreur : Ce script doit impérativement être lancé avec 'sudo -E'."
+    exit 1
+fi
+ if [ -n "$SUDO_USER" ]; then
+    VRAI_HOME=$(echo "/home/$SUDO_USER")
+else
+    VRAI_HOME=$HOME
+fi
+#on autorise la récéption des messages dès le lancement du script
+mesg y 2>/dev/null
+
+ip_pc2=""
 prenom=""
 Theme_actuel=""
 numero_theme=""
 minimum=60
+PORT1=6855
+PORT2=5586
+
+recevoir_msg "$PORT1" &
+pid_msg1=$!
+
+if [ ! -d "$VRAI_HOME/.ssh" ];then
+mkdir -p "$VRAI_HOME/.ssh" && chmod 700 "$VRAI_HOME/.ssh"
+fi
+if [ ! -f "$VRAI_HOME/.ssh/authorized_keys" ];then
+touch "$VRAI_HOME/.ssh/authorized_keys" && chmod 600 "$VRAI_HOME/.ssh/authorized_keys"
+chown "$SUDO_USER:$SUDO_USER" "$VRAI_HOME/.ssh/authorized_keys"
+fi
 
 accueil()
 {
@@ -97,7 +124,7 @@ menu_principal()
             
         elif [ "$choix" = '2' ];then
         	clear
-        	echo "****************En cours*****************************"
+        	reponse
         	sleep 2
     
         elif [ "$choix" = '3' ]; then
@@ -147,171 +174,19 @@ menu_principal()
 	   fi
             	
         elif [ "$choix" = '5' ]; then
-        echo "See you"
-            sleep 2
-            clear
-            exit 0
+        	echo " "
+        	rm -f /tmp/cle_recue.tmp 
+        	echo "See you"
+            	sleep 2
+            	clear
+            	exit 0
         fi
     done
-}
-
-Mode () {
-while true; do
-	clear
-	notif "Entrer le numéro correspondant à votre choix"
-	echo "~~~~~~~~MODE~~~~~~~~"
-	echo "  [1] Mode solo"
-	echo "  [2] Mode assistant"
-	echo "  [3] Mode duel"
-	echo "  [4] Retour"
-	read mode
-
-	while [ -z "$mode" ];do
-	echo "Redéfinissez votre choix"
-	read mode
-	done
-
-	while [ "$mode" != '1' -a "$mode" != '2' -a "$mode" != '3' -a "$mode" != '4' ];do
-		echo "Redéfinissez votre choix"
-		read mode
-	done
-	if [ "$mode" = "1" ]; then
-		modules 
-	elif [ "$mode" = "2" ]; then
-		echo "Encore en cours. Be patient."
-	elif [ "$mode" = "3" ]; then
-		compiler_duel
-		affiche_duel
-	elif [ "$mode" = "4" ]; then
-		return 
-	fi
-done
-}
-
-modules()
-{
-    while true; do
-        clear
-        notif "Entrer le numéro correspondant à votre choix"
-        echo ""	
-        echo "=====THEMES====="
-        echo "~~~~~📁💬🔏~~~~~"
-        echo ""
-        echo "[1] Gestion de fichiers"
-        echo "[2] Traitements de texte"
-        echo "[3] Droits et permissions"
-        echo "[4] Retour"
-        echo "Entrez votre choix: "
-        read module_choix
-
-        while [ -z "$module_choix" ]; do
-            echo "Redéfinissez votre choix"
-            read module_choix
-        done
-        
-        while [ "$module_choix" != '1' -a "$module_choix" != '2' -a "$module_choix" != '3' -a "$module_choix" != '4' ]; do
-            echo "Redéfinissez votre choix"
-            read module_choix
-        done
-
-        if [ "$module_choix" = '1' ]; then
-            Theme_actuel="Gestion de fichiers"
-            numero_theme=1
-            niveau
-        elif [ "$module_choix" = '2' ]; then
-            Theme_actuel="Traitement de texte"
-            numero_theme=2
-            niveau
-        elif [ "$module_choix" = '3' ]; then
-            Theme_actuel="Droits et permissions"
-            numero_theme=3
-            niveau
-        elif [ "$module_choix" = '4' ]; then
-            return
-        fi
-    done
-}
-
-niveau()
-{
-    clear
-    notif "Entrer le numéro correspondant à votre choix"
-    echo "=======NIVEAU======="
-    echo "Thème: $Theme_actuel"
-    echo " "
-    afficher_progress_niveau
-    echo "[4] Retour"
-    echo ""
-    read op
-
-    while [ -z "$op" ]; do
-        echo "Redéfinissez votre choix"
-        read op
-    done
-
-    while [ "$op" != '1' -a "$op" != '2' -a "$op" != '3' -a "$op" != '4' ]; do
-        echo "Redéfinissez votre choix"
-        read op 
-    done
     
-    if [ "$op" = '4' ]; then
-        return
+   if [ -n "$pid_msg1" ]; then
+        kill "$pid_msg1" 2>/dev/null
+        wait "$pid_msg1" 2>/dev/null
     fi
-
-    #verifier na si le niveau est débloqué ou non
-    local repere
-    repere=$(theme_repere)
-    local niv_choisi=""
-    
-    if   [ "$op" = '1' ]; then niv_choisi="niveau1"
-    elif [ "$op" = '2' ]; then niv_choisi="niveau2"
-    elif [ "$op" = '3' ]; then niv_choisi="niveau3"
-    fi
-    
-    
-    local score_actuel
-    score_actuel=$(lire_score "$repere" "$niv_choisi")
-    
-    #Si verouillé alors refuser l'accès et expliquer
-    if [ "$score_actuel" = "verrou" ]; then
-    	echo " Ce niveau est verouillé 🔒 "
-    	
-    	if [ "$niv_choisi" = "niveau2" ]; then
-	    local s1
-            s1=$(lire_score "$repere" "niveau1")
-            echo "   Terminez le niveau 1 avec au moins ${minimum}%"
-            echo "   Votre meilleur score niveau 1 : ${s1}%"
-    	elif [ "$niv_choisi" = "niveau3" ]; then
-            local s2
-            s2=$(lire_score "$repere" "niveau2")
-            echo "   Terminez le niveau 2 avec au moins ${minimum}%"
-            echo "   Votre meilleur score niveau 2 : ${s2}%"
-        fi  
-        
-        sleep 3
-        niveau #re afficher le meni niveau
-        return
-     fi
-    
-    	if [ "$op" = '1' ]; then
-    	    echo "on va y aller doucement"
-    	    barre_chargement
-    	    sleep 2
-    	    quizz "niveau1"
-
-    	elif [ "$op" = '2' ]; then
-    	    echo "Tu peux le faire"
-    	    barre_chargement
-    	    sleep 2
-    	    quizz "niveau2"
-        
-    	elif [ "$op" = '3' ]; then
-    	    echo "HAAH! on devient expert"
-    	    barre_chargement
-    	    sleep 2
-    	    quizz "niveau3"
-        
-   	fi
 }
 
 quizz()
@@ -406,58 +281,7 @@ quizz()
     resultat "$score" "$total" "$niveau"
 }
 
-resultat()
-{
-    local score_final=$1
-    local total_questions=$2
-    local niveau_affiche=$3    
-    clear
-    echo "==================="
-    echo "   FIN DU NIVEAU   "
-    echo "==================="
-    echo ""
-    echo "Thème : $Theme_actuel"
-    echo "Niveau : $niveau_affiche"
-    echo ""
-    echo "Score final : $score_final / $total_questions"
-    echo ""
-
-    # Message selon performance
-    local ratio=$((score_final * 100 / total_questions))
-    if [ "$ratio" -ge 80 ]; then
-        echo "Excellent ! Tu maîtrises ce niveau !"
-    elif [ "$ratio" -ge "$minimum" ]; then
-        echo "Pas mal ! Continue à t'entraîner, tu as atteint le seuil de déblocage du niveau suivant."
-    else
-        echo "Courage ! Réessaie pour t'améliorer, il faut ${minimum}% pour débloquer le niveau suivant!"
-    fi
-    
-    local repere
-    repere=$(theme_repere) #manova ny numero_theme ho nom du theme
-    
-    local ancien
-    ancien=$(lire_score "$repere" "$niveau_affiche")
-    
-	if [ "$ancien" != "verrou" ] && [ "$ancien" -ge "$ratio" ] 2>/dev/null; then
-        	echo ""
-        	echo "Meilleur score conservé : ${ancien}% (actuel : ${ratio}%)"
-	else
-        	# Nouveau meilleur score => sauvegarder
-        	sauver_score "$repere" "$niveau_affiche" "$ratio"
-        	echo ""
-        	echo "Nouveau meilleur score : ${ratio}%"
-        fi
-        
-    #deblocage niveau suivant raha mahatratra ny seuil ou min=60%    
-    debloque_niv "$repere" "$niveau_affiche" "$ratio"
-
-    echo "$(date '+%d/%m/%Y %H:%M') | $prenom | $Theme_actuel | $niveau_affiche | $ratio" >> MasterLin/historique.txt
-    
-    echo ""
-    echo "Appuyer sur Entrer pour revenir"
-    read
-}
-
 accueil
 menu_principal
 
+##comparaison avec projet.sh que veut dire les lignes 252 à 255
