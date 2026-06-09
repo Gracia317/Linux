@@ -397,3 +397,4 @@ afficher_resultat_final()
     echo ""
     read -rp "Appuyez sur ENTREE pour revenir au menu..." _ </dev/tty
 }
+ 
