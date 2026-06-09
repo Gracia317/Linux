@@ -1,4 +1,56 @@
 #!/bin/bash
+resultat()
+{
+    local score_final=$1
+    local total_questions=$2
+    local niveau_affiche=$3    
+    clear
+    echo "==================="
+    echo "   FIN DU NIVEAU   "
+    echo "==================="
+    echo ""
+    echo "Thème : $Theme_actuel"
+    echo "Niveau : $niveau_affiche"
+    echo ""
+    echo "Score final : $score_final / $total_questions"
+    echo ""
+
+    # Message selon performance
+    local ratio=$((score_final * 100 / total_questions))
+    if [ "$ratio" -ge 80 ]; then
+        echo "Excellent ! Tu maîtrises ce niveau !"
+    elif [ "$ratio" -ge "$minimum" ]; then
+        echo "Pas mal ! Continue à t'entraîner, tu as atteint le seuil de déblocage du niveau suivant."
+    else
+        echo "Courage ! Réessaie pour t'améliorer, il faut ${minimum}% pour débloquer le niveau suivant!"
+    fi
+    
+    local repere
+    repere=$(theme_repere) #manova ny numero_theme ho nom du theme
+    
+    local ancien
+    ancien=$(lire_score "$repere" "$niveau_affiche")
+    
+	if [ "$ancien" != "verrou" ] && [ "$ancien" -ge "$ratio" ] 2>/dev/null; then
+        	echo ""
+        	echo "Meilleur score conservé : ${ancien}% (actuel : ${ratio}%)"
+	else
+        	# Nouveau meilleur score => sauvegarder
+        	sauver_score "$repere" "$niveau_affiche" "$ratio"
+        	echo ""
+        	echo "Nouveau meilleur score : ${ratio}%"
+        fi
+        
+    #deblocage niveau suivant raha mahatratra ny seuil ou min=60%    
+    debloque_niv "$repere" "$niveau_affiche" "$ratio"
+
+    echo "$(date '+%d/%m/%Y %H:%M') | $prenom | $Theme_actuel | $niveau_affiche | $ratio" >> MasterLin/historique.txt
+    
+    echo ""
+    echo "Appuyer sur Entrer pour revenir"
+    read
+}
+
 fic()
 {
 	echo "MasterLin/progression_${prenom}.txt" ;
@@ -14,18 +66,9 @@ init_progression()
     # Ne créer que si le fichier n'existe pas encore
     #theme_niveau=ratio ---> Io no format repère an'ny progression
     if [ ! -f "$fichier" ]; then
-    	touch $fichier
-        cat > "$fichier" <<EOF
-gestion_niveau1=0
-gestion_niveau2=verrou      
-gestion_niveau3=verrou
-texte_niveau1=0
-texte_niveau2=verrou
-texte_niveau3=verrou
-droits_niveau1=0
-droits_niveau2=verrou
-droits_niveau3=verrou
-EOF
+    	touch "$fichier"
+        printf '%s\n' "gestion_niveau1=0" "gestion_niveau2=verrou" "gestion_niveau3=verrou" "texte_niveau1=0" "texte_niveau2=verrou" "texte_niveau3=verrou" "droits_niveau1=0" "droits_niveau2=verrou" "droits_niveau3=verrou" "processus_niveau1=0" "processus_niveau2=verrou" "processus_niveau3=verrou" > "$fichier" # c'est plus sûr que EOF question bug satria mora misy bug le EOF de zay ny nahatonga anle tamry
+        #%s ohatran am C ihany hoe manoratra chaîne de caract fa le \n eto midika fa isaky ny chaine de carct dia manao retour à la ligne.Donc mitovy amle version taloha ihany ny affichage mais avec moins de possibilité de bug
         # Protection : seul le propriétaire peut lire/écrire
         chmod 600 "$fichier"
     fi
@@ -41,7 +84,7 @@ lire_score()
 	local fichier
 	fichier=$(fic)
 	#afin d'extraire le ratio après '='
-	grep "^${repere}=" "$fichier" | cut -d'=' -f2
+	grep "^${repere}=" "$fichier" | cut -d'=' -f2 #| tr -d '\r' | sed 's/[[:space:]]*$//' pour éviter le anomalies décriture ex: \r invisible (pour windows) et les espaces invisibles par erreur de sasie   fa afaka tsy asina de nasiko an'ity commentaire ity le izy.
 }
 
 sauver_score() 
@@ -89,6 +132,7 @@ theme_repere()
 if   [ "$numero_theme" = "1" ]; then echo "gestion"
 elif [ "$numero_theme" = "2" ]; then echo "texte"
 elif [ "$numero_theme" = "3" ]; then echo "droits"
+elif [ "$numero_theme" = "4" ]; then echo "processus"
 fi
 }
 
@@ -121,4 +165,3 @@ local affiche1 affiche2 affiche3
     echo "[2] Niveau 2  —  $affiche2"
     echo "[3] Niveau 3  —  $affiche3"
 }
-
