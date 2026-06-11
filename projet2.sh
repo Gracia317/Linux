@@ -41,54 +41,100 @@ touch "$VRAI_HOME/.ssh/authorized_keys" && chmod 600 "$VRAI_HOME/.ssh/authorized
 chown "$SUDO_USER:$SUDO_USER" "$VRAI_HOME/.ssh/authorized_keys"
 fi
 
-accueil()
-{
-clear
-echo "================================"
-echo "      ****MasterLin****      "
-echo " "
-echo " Quizz et apprentissage amusant "
-echo " "
-echo "--------------------------------"
-
-if [ ! -d MasterLin ]; then
-    mkdir MasterLin
-    touch MasterLin/password.txt
-    chmod 600 MasterLin/password.txt
-fi
-
-echo "Entrer votre prénom:"
-read prenom
-
-if grep -q "^$prenom:" MasterLin/password.txt ; then
+connexion_joueur() {
+    local prenom=$1
     echo -n "Joueur existant. Entrer le mot de passe: "
-    read -s mot_de_passe	
+    read -s mot_de_passe    
     echo ""
     
-    saisi=$(echo -n "$mot_de_passe" | sha256sum | cut -d' ' -f1)
-    stocke=$(grep "^$prenom:" MasterLin/password.txt | cut -d ':' -f2)
-    
-   while [ "$saisi" != "$stocke" ]; do
-        echo "Mot de passe incorrect. Réessayer: "
+    local saisi=$(echo -n "$mot_de_passe" | sha256sum | cut -d' ' -f1)
+    local stocke=$(grep "^$prenom:" MasterLin/password.txt | cut -d ':' -f2)
+   
+    local tentative=0
+    while [ "$saisi" != "$stocke" ]; do
+        tentative=$(( tentative + 1 ))
+        if [ "$tentative" -eq 5 ]; then
+            echo "Mot de passe oublié après 5 tentatives?"
+            echo "Veuillez saisir un tout nouveau mot de passe:"
+            read -s mot_de_passe
+            echo ""
+            nouveau=$(echo -n "$mot_de_passe" | sha256sum | cut -d' ' -f1)
+            
+            sed -i "s/^$prenom:.*/$prenom:$nouveau/" MasterLin/password.txt
+            
+            echo "Mot de passe changé avec succès !"
+            break
+        fi
+
+        echo "Mot de passe incorrect. Réessayer (${tentative}/5): "
         read -s mot_de_passe
         echo ""
         saisi=$(echo -n "$mot_de_passe" | sha256sum | cut -d' ' -f1)
     done
     
     echo "Rebonjour $prenom !"
-else
-    echo "Nouveau joueur. Entrez votre mot de passe:"
-    read -s mot_de_passe
+}
+
+accueil() {
+    clear
+    echo "================================"
+    echo "      ****MasterLin**** "
+    echo " "
+    echo " Quizz et apprentissage amusant "
+    echo " "
+    echo "--------------------------------"
+
+    if [ ! -d MasterLin ]; then
+        mkdir MasterLin
+        touch MasterLin/password.txt
+        chmod 600 MasterLin/password.txt
+    fi
+
+    echo "Les joueurs existants:"
+    awk -F ':' '{printf "==>%s\n",$1}' MasterLin/password.txt
     echo ""
-    pwd_hash=$(echo -n "$mot_de_passe" | sha256sum | cut -d ' ' -f1)
-    echo "$prenom:$pwd_hash" >> MasterLin/password.txt
-    echo "Hello $prenom ! Are you ready ?"
-fi
 
-init_progression
+    echo "Entrer votre nom de joueur ou créez-en un nouveau:"
+    read prenom
 
-barre_chargement 
-sleep 1
+    # Si le joueur existe
+    if grep -q "^$prenom:" MasterLin/password.txt ; then
+        connexion_joueur "$prenom"
+    else
+        echo "Ce nom ne correspond à aucun joueur existant. Créer un nouveau joueur?"
+        echo " [o] oui    [n] non    [autre] pour quitter"
+        read noui
+        case $noui in
+            o|O)
+                echo -n "Entrez votre mot de passe: "
+                read -s mot_de_passe
+                echo ""
+                pwd_hash=$(echo -n "$mot_de_passe" | sha256sum | cut -d ' ' -f1)
+                echo "$prenom:$pwd_hash" >> MasterLin/password.txt
+                echo "Hello $prenom ! Are you ready ?"
+                ;;
+                
+            n|N)
+                echo "Veuillez entrer un nom de joueur existant..."
+                read prenom
+                if grep -q "^$prenom:" MasterLin/password.txt ; then
+                    connexion_joueur "$prenom"
+                else
+                    echo "Joueur introuvable. Fin du programme."
+                    exit 1
+                fi
+                ;;
+                
+            *)
+                echo "Choix invalide."
+                exit 1
+                ;;
+        esac
+    fi
+
+    init_progression
+    barre_chargement 
+    sleep 1
 }
 
 menu_principal()
