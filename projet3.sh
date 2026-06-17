@@ -2,9 +2,9 @@
 #script bash du jeu
 
 source ./score.sh	#contient les fichier de progressions, et score etc;;;
-source ./Outil.sh	# port et ip, barre de chargem et notif, notif, checknmap, installation nmap, nc
+source ./Outils.sh	# port et ip, barre de chargem et notif, notif, checknmap, installation nmap, nc
 source ./Menu.sh
-source ./assist.sh
+source ./assists.sh
 source ./duel.sh
 SERVEUR_DUEL="./serveur1"
 CLIENT_DUEL="./client1"
@@ -152,15 +152,15 @@ menu_principal()
     
         elif [ "$choix" = '2' ]; then
             clear
-            echo "		      =======❓A propos❓======"
-            echo "	-------------------------------------------------------"
-            echo "	|MasterLin — Jeu de quiz Linux                        |"
-            echo "	|4 modules : fichiers, texte, permissions et processus|"
-            echo "	|3 niveaux par module                                 |"
-            echo "	|Questions aléatoires a chaque partie                 |"
-            echo "	|#en cours# mode assistance et duel                   |"
-            echo "	-------------------------------------------------------"
-            echo "		      ========================="
+            echo "		=======❓A propos❓======"
+            echo "	------------------------------------------"
+            echo "	|MasterLin — Jeu de quiz Linux           |"
+            echo "	|3 modules : fichiers, texte, permissions|"
+            echo "	|3 niveaux par module                    |"
+            echo "	|Questions aléatoires a chaque partie    |"
+            echo "	|#en cours# mode assistance et duel      |"
+            echo "	-----------------------------------------"
+            echo "		========================="
             echo "Appuyez sur Entree pour revenir..."
             read
 
