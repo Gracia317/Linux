@@ -1,32 +1,37 @@
 #!/bin/bash
 
-reponse () {
-    # Lire l'IP de l'expéditeur depuis le fichier tmp de PORT2 (port d'écoute de l'assistant)
-    local ip_pc1
-    ip_pc1=$(cut -d ':' -f2 "/tmp/msg_${PORT2}.tmp" 2>/dev/null)
-    if [ -z "$ip_pc1" ]; then
-        echo "Aucun message reçu"
-        sleep 2
-        return
-    fi
-    ecrire_msg "$ip_pc1" "$PORT2"
-}
-
 recevoir_msg () {
     local port=$1
-    local sms="/tmp/msg_${port}.tmp"   # fichier unique par port
-    touch "$sms"
+    sms="/tmp/msg_${port}.tmp" # fichier unique par port
+    ip="/tmp/ip_${port}.tmp"
+    touch "$sms" "$ip"
     while true; do
-        > "$sms" # videna aloha le fichier pour être sûr hoe tsisy erreur d'affichage 
         nc -l -p "$port" > "$sms"
-        if [ -s "$sms" ]; then # raha misy le fichier
-            local source msg
+    if [ -s "$sms" ]; then # raha misy le fichier
+            local source msg ip_dest
+            ip_dest=$(cut -d ':' -f2 "$sms")
+            echo "$ip_dest" > "$ip"
             source=$(cut -d ':' -f1 "$sms")
             msg=$(cut -d ':' -f3- "$sms")
-            if [ -n "$msg" ] && [ -n "$source" ]; then
-                zenity --title="Message de : $source" --info --text="$msg" --ok-label="Lu" 2>/dev/null
-            fi
+      if [ -n "$msg" ] && [ -n "$source" ]; then
+      paplay /usr/share/sounds/freedesktop/stereo/complete.oga
+         reponse_texte=$(zenity --entry --title="Message de : $source" --text="$msg\n\nVotre réponse :" --ok-label="Envoyer" --cancel-label="Ignorer" 2>/dev/null)
+
+        if [ $? -eq 0 ] && [ -n "$reponse_texte" ]; then
+        local mon_ip mon_nom port_dest
+        mon_ip=$(hostname -I | awk '{print $1}')
+        mon_nom="$USER"
+
+        if [ "$port" = "$PORT1" ]; then
+            port_dest="$PORT2"
+        else
+            port_dest="$PORT1"
         fi
+
+        echo "${mon_nom}:${mon_ip}:${reponse_texte}" | nc -w 5 "$ip_dest" "$port_dest"
+       fi
+       fi
+    fi
     done
 }
 
@@ -35,11 +40,10 @@ ecrire_msg () {
     local port=$2
     local mon_ip
     mon_ip=$(hostname -I | awk '{print $1}')   # première IP seulement
-    local name="$SUDO_USER" # "${SUDO_USER:-$USER}" pour éviter l'erreur de SUDO_USER vide si on veut
+    local name="$USER"
     local message
     echo "Entrer votre message :"
-    read  message
-    echo "tonga"
+    read  message </dev/tty
     echo "${name}:${mon_ip}:${message}" | nc -w 5 "$ip" "$port"
     echo "Message envoyé !"
 }
@@ -72,7 +76,7 @@ check_nmap () {
     if command -v nmap &>/dev/null; then
         echo "Les adresses IP des PC connectés disponibles sont :"
         local my_IP routeur_IP LIGNE NB_MOTS
-        my_IP=$(hostname -I)
+        my_IP=$(hostname -I | awk '{printf $1}')
         routeur_IP=$(ip route show | grep default | awk '{print $3}')
         LIGNE=$(nmap -PR -sn "$plage" | grep "Nmap scan report for" | grep -v -e "$my_IP" -e "$routeur_IP")
         NB_MOTS=$(echo "$LIGNE" | wc -w)
@@ -101,13 +105,13 @@ installer () {
     os=$(grep -E "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')
     case "$os" in
         ubuntu|debian) 
-        apt-get update -y && apt-get install -y "$1" 
+        sudo apt-get update -y && sudo apt-get install -y "$1" 
         ;;
         fedora)        
-        dnf install -y "$1" 
+        sudo dnf install -y "$1" 
         ;;
         arch)          
-        pacman -Sy --noconfirm "$1" 
+        sudo pacman -Sy --noconfirm "$1" 
         ;;
         *) 
         echo "[-] Distribution non prise en charge ($os). Veuillez installer $1 manuellement." 
@@ -115,18 +119,19 @@ installer () {
     esac
 }
 
+
 installer_nc () {
     local os
     os=$(grep -E "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')
     case "$os" in
         ubuntu|debian) 
-        apt-get update -y && apt-get install -y netcat-openbsd 
+        sudo apt-get update -y && sudo apt-get install -y netcat-openbsd 
         ;;
         fedora)        
-        dnf install -y nc 
+        sudo dnf install -y nc 
         ;;
         arch)          
-        pacman -Sy --noconfirm gnu-netcat 
+        sudo pacman -Sy --noconfirm gnu-netcat 
         ;;
         *) 
         echo "[-] Distribution non prise en charge ($os). Installez Netcat manuellement." 
@@ -139,5 +144,32 @@ check_nc () {
         echo "Netcat (nc) n'est pas installé. Lancement de l'installation..."
         installer_nc
         check_nc
+    fi
+}
+ 
+installer_audio () {
+    local os
+    os=$(grep -E "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')
+    case "$os" in
+        ubuntu|debian) 
+        sudo apt-get update -y && sudo apt-get install -y pulseaudio-utils 
+        ;;
+        fedora)        
+        sudo dnf install -y  pulseaudio-utils 
+        ;;
+        arch)          
+        sudo pacman -Sy --noconfirm libpulse
+        ;;
+        *) 
+        echo "[-] Distribution non prise en charge ($os). Veuillez installer pulseaudio-utils  manuellement." 
+        ;;
+    esac
+}
+
+check_audio () {
+    if ! command -v paplay &>/dev/null; then
+        echo "Pulseaudio-utils n'est pas installé, connexion internet requise. Lancement de l'installation..."
+        installer_audio
+        check_audio
     fi
 }
