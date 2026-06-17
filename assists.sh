@@ -1,5 +1,5 @@
 #!/bin/bash
-source ./Outil.sh
+source ./Outils.sh
 assist () {
 if [ -n "$pid_msg1" ]; then
         kill "$pid_msg1" 2>/dev/null
@@ -21,8 +21,9 @@ fi
 # Vérifier si le Wi-Fi est connecté (operstate = up)
 if [ "$(cat /sys/class/net/$wifi_interface/operstate)" = "up" ]; then
     echo "Connecté à un réseau sans fil (WLAN) via $wifi_interface"
-   check_nc
-   check_nmap           
+   check_nc   
+   check_audio
+   check_nmap 
    echo "Sur lequel de ces pc voulez vous choisir comme assistant?"
    read -p "IP : " ip_pc2
    sleep 2
@@ -67,13 +68,7 @@ quizz_as ()
         # Ignorer lignes vides ou commentaires (filtre de sécurité)
         [ -z "$question" ] && continue
         [[ "$question" == \#* ]] && continue
-        # nettoyage des espaces et \r parasites sur TOUS les champs
-        # question=$(echo "$question" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-        #C1=$(echo "$C1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-        #C2=$(echo "$C2" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-        #C3=$(echo "$C3" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-        #C4=$(echo "$C4" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-        #bonne=$(echo "$bonne" | tr -d '[:space:]\r')
+
         clear
         echo "=== Question $numeroquest/$total ==="
         echo "Thème : $Theme_actuel"
@@ -86,8 +81,9 @@ quizz_as ()
         echo "  [3] $C3"
         echo "  [4] $C4"
         echo ""
-        echo "Pour répondre entrer le numéro qui correpond à ces propositions" 
-        echo "Sinon tapez 0 pour envoyer un message à l'assistant"
+        echo "Pour répondre, entrer le numéro qui correspond à ces propositions" 
+        echo "ou tapez 0 pour envoyer un message à l'assistant"
+        echo "...sinon tapez sur [ENTREE] pour quitter..."
         local choice
         local reponse
 
@@ -96,8 +92,9 @@ quizz_as ()
             [ -z "$choice" ] && continue
             case "$choice" in
                 0)
-                    # Envoyer un message sans quitter la question
-                    ecrire_msg "$ip_pc2" "$PORT1"
+                    #  FIX : forcer ecrire_msg à lire depuis /dev/tty
+                    # pour éviter qu'elle lise le flux CSV de la boucle while
+                    ecrire_msg "$ip_pc2" "$PORT1" </dev/tty
                     # Réafficher la question pour que le joueur puisse répondre
                     echo ""
                     echo "=== Question $numeroquest/$total ==="
@@ -107,7 +104,7 @@ quizz_as ()
                     echo "  [3] $C3"
                     echo "  [4] $C4"
                     echo ""
-                    echo "Votre réponse (1-4) ou 0 pour envoyer un message :"
+                    echo "Votre réponse (1-4) ou 0 pour envoyer un message sinon [ENTREE] pour quitter:"
                     ;;
                 [1-4])
                     reponse="$choice"
@@ -130,13 +127,23 @@ quizz_as ()
                     fi
                     break  # On passe à la question suivante seulement ici
                     ;;
+                    
+                "") 
+                    # si la réponse est vide, c-à-d le joueur a appuyé sur entrée, on quitte
+                    if [ -z "$reponse" ]; then 
+                        echo ""
+                        echo "Abandon du quiz... Retour au menu principal."
+                        sleep 2
+                        return # On stoppe la fonction et on retourne au menu principal
+                    fi	
+                    ;;
                 *)
-                    echo "Option invalide. Entrez 1-4 pour répondre ou 0 pour envoyer un message."
+                    echo "Option invalide. Entrez 1-4 pour répondre ; 0 pour envoyer un message; ou [ENTREE] pour quitter"
                     ;;
             esac
         done
-           numeroquest=$((numeroquest + 1))
-           sleep 3
+        numeroquest=$((numeroquest + 1))
+        sleep 3
 
     # pipeline propre — grep filtre, shuf mélange, head limite à $total
    done < <(grep -v '^#' "$fichier_question" | grep -v '^[[:space:]]*$' | shuf | head -n $total)
