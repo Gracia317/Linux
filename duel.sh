@@ -1,12 +1,10 @@
 #!/bin/bash
-# duel1.sh — Mode duel réseau
-# projet2.sh définit : SERVEUR_DUEL, CLIENT_DUEL, PORT_DUEL
  
 affiche_duel()
 {
     clear
     echo "================================="
-    echo "        MODE DUEL NETWORK        "
+    echo "            MODE DUEL            "
     echo "================================="
     echo ""
     echo "    [1] Lancer un round duel    (Joueur A / Serveur)"
@@ -18,21 +16,23 @@ affiche_duel()
  
     case "$safidy" in
         1)
-            IP_LOCAL=$(hostname -I 2>/dev/null | awk '{print $1}')
-            [ -z "$IP_LOCAL" ] && IP_LOCAL=$(ip route get 1.1.1.1 2>/dev/null | awk '{print $7}' | head -1)
-            [ -z "$IP_LOCAL" ] && IP_LOCAL="127.0.0.1"
+            IP_LOCAL=$(ip route get 1.1.1.1 2>/dev/null | awk '{print $7}' | head -n 1)
+            [ -z "$IP_LOCAL" ] && IP_LOCAL=$(hostname -I | awk '{print $1}')
+            
             echo ""
             echo "========================================="
-            echo "  TON IP RÉSEAU : $IP_LOCAL"
-            echo "  Port          : $PORT_DUEL"
+            echo "  TON IP RÉSEAU ACTIVE : $IP_LOCAL"
+            echo "  Port de Duel         : $PORT_DUEL"
             echo "========================================="
-            echo "[*] Donne cette IP au Joueur B."
+            echo "[*] Donne cette IP exacte au Joueur B."
             echo ""
             quiz_duel_serveur
             ;;
         2)
             local ip_serveur=""
-            read -p "Entrez l'IP du serveur (Joueur A) : " ip_serveur
+            echo "Entrez l'IP du serveur (Joueur A) (Vous devez être sur le même réseau): "
+            echo "ou tapez sur ENTREE pour quitter..."
+            read ip_serveur
             if [ -z "$ip_serveur" ]; then
                 echo "IP vide. Annulation."
                 sleep 1
@@ -53,27 +53,26 @@ affiche_duel()
 compiler_duel()
 {
     if [ ! -f "./serveur1" ] || [ ! -f "./client1" ]; then
-        echo "[*] Compilation..."
+        echo "[*] Compilation des modules C..."
         gcc -o serveur1 serveur1.c 2>/dev/null
         gcc -o client1 client1.c 2>/dev/null
         if [ ! -f "./serveur1" ] || [ ! -f "./client1" ]; then
-            echo "ERREUR : Compilation échouée."
+            echo "ERREUR : La compilation a échoué. Vérifiez vos fichiers C."
             read -rp "Appuyez sur ENTREE..." </dev/tty
             return 1
         fi
-        echo "Compilation OK."
+        echo "Compilation réussie !"
     fi
     return 0
 }
 
+# CORRECTION CRITIQUE : Nettoyage global sans wait bloquant
 nettoyage_duel()
 {
-    kill "$SERVEUR_PID"  2>/dev/null
-    kill "$CLIENT_A_PID" 2>/dev/null
-    kill "$CLIENT_B_PID" 2>/dev/null
-    wait "$SERVEUR_PID"  2>/dev/null
-    wait "$CLIENT_A_PID" 2>/dev/null
-    wait "$CLIENT_B_PID" 2>/dev/null
+    # On rase tous les processus éphémères résiduels pour libérer le port instantanément
+    killall -9 serveur1 client1 2>/dev/null
+    
+    # Suppression propre des descripteurs de fichiers temporaires de cette session
     rm -f /tmp/duel_qstA_*_$$ /tmp/duel_repA_*_$$
     rm -f /tmp/duel_qstB_*_$$ /tmp/duel_repB_*_$$
     rm -f /tmp/duel_srv_$$.log
@@ -85,6 +84,7 @@ nettoyage_duel()
 quiz_duel_serveur()
 {
     compiler_duel || return 1
+    nettoyage_duel # Nettoyage préventif
  
     local fichier_question="questions/questionsduel.csv"
     [ ! -f "$fichier_question" ] && fichier_question="questionsduel.csv"
@@ -94,13 +94,11 @@ quiz_duel_serveur()
         return 1
     fi
  
-    # Charger exactement 10 questions
-    mapfile -t QUESTIONS < <(grep -v '^#' "$fichier_question" \
-        | grep -v '^[[:space:]]*$' | shuf | head -n 10)
+    mapfile -t QUESTIONS < <(grep -v '^#' "$fichier_question" | grep -v '^[[:space:]]*$' | shuf | head -n 10) #mapfile est comme un tableau portant le nom QUESTIONS qui stocke les 10 lignes aléatoires
  
-    local total=${#QUESTIONS[@]}
+    local total=${#QUESTIONS[@]} #total = au nombre case du tableau QUESTIONS généré par mapfile
     if [ "$total" -eq 0 ]; then
-        echo "Aucune question chargée !"
+        echo "Aucune question trouvée dans le fichier CSV."
         read -rp "Appuyez sur ENTREE..." </dev/tty
         return 1
     fi
@@ -109,137 +107,122 @@ quiz_duel_serveur()
     local score_A=0
     local score_B=0
  
-    clear
-    echo "=== DUEL — Joueur A ==="
-    echo "[*] IP : $(hostname -I 2>/dev/null | awk '{print $1}')  Port : $PORT_DUEL"
-    echo "[*] Attends que le Joueur B lance son côté."
     echo ""
-    read -rp "Appuyez sur ENTREE pour démarrer... " </dev/tty
+    echo ""
+    echo "=== DUEL — Joueur A (Serveur) ==="
+    echo "[*] En attente du Joueur B..."
+    echo ""
+    read -rp "Appuyez sur ENTREE pour ouvrir la session de jeu... " </dev/tty
  
     mkdir -p duel
  
-    # Boucle while (plus fiable que for pour contrôler le compteur)
     while [ $numeroquest -le $total ]; do
         local idx=$((numeroquest - 1))
         local ligne="${QUESTIONS[$idx]}"
         IFS='|' read -r question C1 C2 C3 C4 bonne <<< "$ligne"
  
-        # Tuer toute instance précédente proprement
-        kill $SERVEUR_PID 2>/dev/null
-        wait $SERVEUR_PID 2>/dev/null
-        sleep 0.3
+        # Sécurité entre chaque question : On s'assure que le port 9000 est VRAIMENT libre
+        killall -9 serveur1 client1 2>/dev/null
+        sleep 0.4 
  
-        # Lancer serveur1 pour ce round
+        # Lancement du serveur pour la question en cours
         "$SERVEUR_DUEL" "$PORT_DUEL" "$bonne" "$ligne" > /tmp/duel_srv_$$.log 2>&1 &
-        SERVEUR_PID=$!
  
-        # Attendre SERVEUR_PRET
+        # Attente active du signal SERVEUR_PRET généré par serveur1.c
         local attente=0
         while [ $attente -lt 30 ]; do
             grep -q "SERVEUR_PRET" /tmp/duel_srv_$$.log 2>/dev/null && break
             sleep 0.2; attente=$((attente + 1))
         done
+        
         if [ $attente -ge 30 ]; then
-            echo "ERREUR: serveur non démarré. On réessaie..."
+            echo "Port $PORT_DUEL engorgé. Réinitialisation du socket..."
+            nettoyage_duel
             sleep 1; continue
         fi
  
-        # Fichiers temporaires pour ce round
         local tmp_qst="/tmp/duel_qstA_${numeroquest}_$$"
         local tmp_rep="/tmp/duel_repA_${numeroquest}_$$"
         rm -f "$tmp_qst" "$tmp_rep"
  
-        # Connexion de A en local (background)
+        # Connexion locale du Joueur A au serveur C
         "$CLIENT_DUEL" "127.0.0.1" "$PORT_DUEL" "$tmp_qst" "$tmp_rep" > /dev/null 2>&1 &
-        local CLIENT_A_PID=$!
  
-        # Attendre que A soit connecté (question reçue)
+        # Attente que le client local reçoive le bloc de la question
         attente=0
         while [ $attente -lt 50 ]; do
             [ -f "$tmp_qst" ] && grep -q "QUESTION_PRETE" "$tmp_qst" 2>/dev/null && break
             sleep 0.1; attente=$((attente + 1))
         done
  
-        # Afficher la question à A
+        # Interface graphique terminal du joueur A
         clear
         echo "=== Question $numeroquest/$total ==="
-        echo "(Score => A : $score_A  |  B : $score_B)"
-        echo ""
+        echo "(Score actuel => Toi : $score_A  |  Adversaire : $score_B)"
+        echo "-----------------------------------------"
         echo " $question"
         echo "  [1] $C1"
         echo "  [2] $C2"
         echo "  [3] $C3"
         echo "  [4] $C4"
+        echo "-----------------------------------------"
         echo ""
  
-        # Lire la réponse de A
         local reponse_A=""
-        read -rp "Votre réponse (1-4) ou 'q' pour quitter : " reponse_A </dev/tty
+        read -rp "Votre réponse (1-4) ou 'q' pour abandonner : " reponse_A </dev/tty
         while [[ "$reponse_A" != [1-4] && "$reponse_A" != "q" ]]; do
-            read -rp "Invalide. Tapez (1-4) ou 'q' : " reponse_A </dev/tty
+            read -rp "Saisie incorrecte (1-4/q) : " reponse_A </dev/tty
         done
 
         if [ "$reponse_A" = "q" ]; then
-            echo "Abandon du duel."
-             nettoyage_duel
+            echo "Fin du match par abandon."
+            nettoyage_duel
             return 0
         fi
  
-        # Écrire la réponse → client1 la lit et l'envoie au serveur
+        # Envoi de la réponse au client1 via le fichier tampon
         echo "$reponse_A" > "$tmp_rep"
+        echo "[-] Réponse transmise. Attente du calcul de vélocité de l'adversaire..."
  
-        echo "En attente de la réponse de B..."
- 
-        # Attendre que le résultat arrive dans tmp_qst
+        # Attente du verdict final calculé par le serveur
         attente=0
-        while [ $attente -lt 100 ]; do
+        while [ $attente -lt 150 ]; do
             grep -q "VAINQUEUR" "$tmp_qst" 2>/dev/null && break
-            sleep 0.3; attente=$((attente + 1))
+            sleep 0.2; attente=$((attente + 1))
         done
  
-        wait $CLIENT_A_PID 2>/dev/null
-        wait $SERVEUR_PID 2>/dev/null
- 
-        # Extraire et afficher le résultat
         local vainqueur_round
         vainqueur_round=$(grep -o 'VAINQUEUR:[A-Z]*' "$tmp_qst" 2>/dev/null | cut -d':' -f2)
  
         case "$vainqueur_round" in
-            A)     score_A=$((score_A + 1)); echo ""; echo "✅ Tu gagnes ce round !" ;;
-            B)     score_B=$((score_B + 1)); echo ""; echo "❌ Le Joueur B a été plus rapide." ;;
-            AUCUN) echo ""; echo "😐 Aucun bon. Pas de point." ;;
-            *)     echo ""; echo "⚠️  Résultat inconnu." ;;
+            A)     score_A=$((score_A + 1)); echo -e "\n +1 Point ! Tu as été le plus rapide !" ;;
+            B)     score_B=$((score_B + 1)); echo -e "\n Le Joueur B a répondu plus vite !" ;;
+            AUCUN) echo -e "\n Aucun joueur n'a donné la bonne réponse." ;;
+            *)     echo -e "\n Le Joueur B a expiré (Timeout)." ;;
         esac
  
         local diff_us
         diff_us=$(grep -o 'DIFF:[0-9]*' "$tmp_qst" 2>/dev/null | cut -d':' -f2)
         if [ -n "$diff_us" ] && [ "$diff_us" != "0" ]; then
-            echo "  ⏱ Écart : $(( diff_us / 1000 )) ms"
+            echo "  ⏱ Écart de réactivité : $(( diff_us / 1000 )) ms"
         fi
  
-        echo ""
-        echo "Score → A : $score_A  |  B : $score_B"
         rm -f "$tmp_qst" "$tmp_rep" /tmp/duel_srv_$$.log
  
         if [ $numeroquest -lt $total ]; then
             echo ""
-            read -rp "Appuyez sur ENTREE pour la suite..." </dev/tty
-            if [ "$_continuer" = "q" ]; then
-                echo "Abandon du duel."
-                nettoyage_duel
-                return 0
-            fi
+            read -rp "Appuyez sur [ENTREE] pour générer le round suivant..." </dev/tty
         fi
  
         numeroquest=$((numeroquest + 1))
     done
  
     afficher_resultat_final "$score_A" "$score_B" "$total"
+    nettoyage_duel
 }
  
 # ================================================================
 # JOUEUR B — CLIENT
-# Boucle while (pas for) pour contrôler le compteur proprement
 # ================================================================
 quiz_duel_client()
 {
@@ -250,115 +233,101 @@ quiz_duel_client()
     local score_B=0
  
     clear
-    echo "=== DUEL — Joueur B ==="
-    echo "[*] Serveur : $ip:$PORT_DUEL"
+    echo "=== DUEL — Joueur B (Client) ==="
+    echo "[*] Cible de connexion -> $ip:$PORT_DUEL"
     echo ""
  
     while [ $numeroquest -le $total ]; do
- 
         local tmp_qst="/tmp/duel_qstB_${numeroquest}_$$"
         local tmp_rep="/tmp/duel_repB_${numeroquest}_$$"
         rm -f "$tmp_qst" "$tmp_rep"
  
         clear
         echo "=== Question $numeroquest/$total ==="
-        echo "(Score → A : $score_A  |  B : $score_B)"
-        echo ""
-        echo "Connexion au serveur $ip..."
+        echo "(Score actuel => Adversaire : $score_A  |  Toi : $score_B)"
+        echo "-----------------------------------------"
+        echo "Connexion réseau vers le Serveur distant..."
  
-        # Lancer client1 en background
+        # Tentative de poignée de main avec le serveur A
         "$CLIENT_DUEL" "$ip" "$PORT_DUEL" "$tmp_qst" "$tmp_rep" > /dev/null 2>&1 &
-        local CLIENT_B_PID=$!
  
-        # Attendre la question (timeout 30s)
+        # Attente de la réception du flux réseau de la question
         local attente=0
-        while [ $attente -lt 150 ]; do
+        while [ $attente -lt 100 ]; do
             [ -f "$tmp_qst" ] && grep -q "QUESTION_PRETE" "$tmp_qst" 2>/dev/null && break
             sleep 0.2; attente=$((attente + 1))
         done
  
-        # Si timeout → on réessaie CE round (compteur inchangé)
-        if [ $attente -ge 150 ]; then
+        # Gestion des désynchronisations réseau : si A n'est pas prêt, on boucle sur le même round
+        if [ $attente -ge 100 ]; then
             echo ""
-            echo "Connexion échouée. Vérifiez que le Joueur A a bien lancé son côté."
-            echo "Nouvelle tentative dans 3 secondes..."
-            kill $CLIENT_B_PID 2>/dev/null
-            wait $CLIENT_B_PID 2>/dev/null
+            echo "⚠️  Serveur distant indisponible ou round non généré."
+            echo "Synchronisation en cours, nouvelle tentative automatique..."
+            killall -9 client1 2>/dev/null
             rm -f "$tmp_qst" "$tmp_rep"
-            sleep 3
-            continue   # ← on refait le même round (numeroquest inchangé)
+            sleep 2
+            continue
         fi
  
-        # Afficher la question
+        # Affichage de la question reçue via le réseau
         clear
         echo "=== Question $numeroquest/$total ==="
-        echo "(Score → A : $score_A  |  B : $score_B)"
-        echo ""
+        echo "(Score actuel => Joueur A : $score_A  |  Toi : $score_B)"
+        echo "-----------------------------------------"
         grep -v "QUESTION_PRETE\|VAINQUEUR\|DIFF" "$tmp_qst" 2>/dev/null
+        echo "-----------------------------------------"
         echo ""
  
-        # Lire la réponse de B
         local reponse_B=""
-        read -rp "Votre réponse (1-4) ou 'q' pour quitter: " reponse_B </dev/tty
+        read -rp "Votre réponse (1-4) ou 'q' pour abandonner : " reponse_B </dev/tty
         while [[ "$reponse_B" != [1-4] && "$reponse_B" != "q" ]]; do
-            read -rp "Invalide. Tapez (1-4) ou 'q' : " reponse_A </dev/tty
+            read -rp "Saisie incorrecte (1-4/q) : " reponse_B </dev/tty
         done
         
         if [ "$reponse_B" = "q" ]; then
-            echo "Abandon du duel."
+            echo "Fin du match par abandon."
             nettoyage_duel
             return 0
         fi
  
-        # Écrire la réponse → client1 la lit et l'envoie
         echo "$reponse_B" > "$tmp_rep"
+        echo "[-] Réponse transmise. Attente des résultats du serveur..."
  
-        echo "Réponse envoyée. Attente du résultat..."
- 
-        # Attendre le résultat
+        # Attente du verdict réseau global
         attente=0
         while [ $attente -lt 100 ]; do
             grep -q "VAINQUEUR" "$tmp_qst" 2>/dev/null && break
             sleep 0.3; attente=$((attente + 1))
         done
  
-        wait $CLIENT_B_PID 2>/dev/null
- 
-        # Extraire et afficher le résultat
         local vainqueur_round
         vainqueur_round=$(grep -o 'VAINQUEUR:[A-Z]*' "$tmp_qst" 2>/dev/null | cut -d':' -f2)
  
         case "$vainqueur_round" in
-            A)     score_A=$((score_A + 1)); echo ""; echo "❌ Le Joueur A a été plus rapide." ;;
-            B)     score_B=$((score_B + 1)); echo ""; echo "✅ Tu gagnes ce round !" ;;
-            AUCUN) echo ""; echo "😐 Aucun bon. Pas de point." ;;
-            *)     echo ""; echo "⚠️  Résultat inconnu." ;;
+            A)     score_A=$((score_A + 1)); echo -e "\n Le Joueur A a été plus rapide !" ;;
+            B)     score_B=$((score_B + 1)); echo -e "\n +1 Point ! Tu as été le plus rapide !" ;;
+            AUCUN) echo -e "\n Aucun point attribué sur ce round." ;;
+            *)     echo -e "\n Erreur de synchronisation sur ce round." ;;
         esac
  
         local diff_us
         diff_us=$(grep -o 'DIFF:[0-9]*' "$tmp_qst" 2>/dev/null | cut -d':' -f2)
         if [ -n "$diff_us" ] && [ "$diff_us" != "0" ]; then
-            echo "  ⏱ Écart : $(( diff_us / 1000 )) ms"
+            echo "  ⏱ Écart de réactivité : $(( diff_us / 1000 )) ms"
         fi
  
-        echo ""
-        echo "Score → A : $score_A  |  B : $score_B"
         rm -f "$tmp_qst" "$tmp_rep"
  
         if [ $numeroquest -lt $total ]; then
             echo ""
-            read -rp "Appuyez sur ENTREE pour la suite..." </dev/tty
-            if [ "$_continuer" = "q" ]; then
-                echo "Abandon du duel."
-                nettoyage_duel
-                return 0
-            fi
+            read -rp "Appuyez sur [ENTREE] pour vous synchroniser sur le round suivant..." </dev/tty
         fi
  
-        numeroquest=$((numeroquest + 1))   # ← avance seulement si round réussi
+        numeroquest=$((numeroquest + 1))
     done
  
     afficher_resultat_final "$score_A" "$score_B" "$total"
+    nettoyage_duel
 }
  
 afficher_resultat_final()
@@ -371,8 +340,8 @@ afficher_resultat_final()
     echo "══════════════════════════"
     echo "   RÉSULTAT FINAL DU DUEL"
     echo "══════════════════════════"
-    echo "  Joueur A : $score_A / $total"
-    echo "  Joueur B : $score_B / $total"
+    echo "  Joueur A (serveur) : $score_A / $total"
+    echo "  Joueur B (client)  : $score_B / $total"
     echo ""
     
     local verdict=""
@@ -397,4 +366,3 @@ afficher_resultat_final()
     echo ""
     read -rp "Appuyez sur ENTREE pour revenir au menu..." _ </dev/tty
 }
- 
