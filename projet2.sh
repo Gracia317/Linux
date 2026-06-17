@@ -5,20 +5,11 @@ source ./score.sh	#contient les fichier de progressions, et score etc;;;
 source ./Outil.sh	# port et ip, barre de chargem et notif, notif, checknmap, installation nmap, nc
 source ./Menu.sh
 source ./assist.sh
-source ./duel1.sh
+source ./duel.sh
 SERVEUR_DUEL="./serveur1"
 CLIENT_DUEL="./client1"
-PORT_DUEL=8080
+PORT_DUEL=9000
 
-if [ "$EUID" -ne 0 ]; then
-    echo "Erreur : Ce script doit impérativement être lancé avec 'sudo -E'."
-    exit 1
-fi
- if [ -n "$SUDO_USER" ]; then
-    VRAI_HOME=$(echo "/home/$SUDO_USER")
-else
-    VRAI_HOME=$HOME
-fi
 #on autorise la récéption des messages dès le lancement du script
 mesg y 2>/dev/null
 
@@ -27,19 +18,11 @@ prenom=""
 Theme_actuel=""
 numero_theme=""
 minimum=60
-PORT1=6855
-PORT2=5586
+export PORT1=6855
+export PORT2=5586
 
 recevoir_msg "$PORT1" &
 pid_msg1=$!
-
-if [ ! -d "$VRAI_HOME/.ssh" ];then
-mkdir -p "$VRAI_HOME/.ssh" && chmod 700 "$VRAI_HOME/.ssh"
-fi
-if [ ! -f "$VRAI_HOME/.ssh/authorized_keys" ];then
-touch "$VRAI_HOME/.ssh/authorized_keys" && chmod 600 "$VRAI_HOME/.ssh/authorized_keys"
-chown "$SUDO_USER:$SUDO_USER" "$VRAI_HOME/.ssh/authorized_keys"
-fi
 
 connexion_joueur() {
     local prenom=$1
@@ -137,7 +120,6 @@ accueil() {
     sleep 1
 }
 
-
 menu_principal()
 {
     while true; do
@@ -148,10 +130,9 @@ menu_principal()
         echo "      ****MasterLin****      "
         echo "================================"
         echo "		[1] Jouer"
-        echo "  	[2] Message" 
-        echo "		[3] A propos"	
-        echo "		[4] Historique"	
-        echo "		[5] Quitter"
+        echo "		[2] A propos"	
+        echo "		[3] Historique"	
+        echo "		[4] Quitter"
         echo "Entrez votre choix:"
         read choix
     
@@ -160,7 +141,7 @@ menu_principal()
             read choix
         done
 
-        while [ "$choix" != '1' -a "$choix" != '2' -a "$choix" != '3' -a "$choix" != '4' -a "$choix" != '5' ]; do
+        while [ "$choix" != '1' -a "$choix" != '2' -a "$choix" != '3' -a "$choix" != '4' ]; do
             echo "Redéfinissez votre choix"
             read choix
         done
@@ -168,27 +149,22 @@ menu_principal()
         if [ "$choix" = '1' ]; then
             clear
             Mode
-            
-        elif [ "$choix" = '2' ];then
-        	clear
-        	reponse
-        	sleep 2
     
-        elif [ "$choix" = '3' ]; then
+        elif [ "$choix" = '2' ]; then
             clear
-            echo "		=======❓A propos❓======"
-            echo "	------------------------------------------"
-            echo "	|MasterLin — Jeu de quiz Linux           |"
-            echo "	|3 modules : fichiers, texte, permissions|"
-            echo "	|3 niveaux par module                    |"
-            echo "	|Questions aléatoires a chaque partie    |"
-            echo "	|#en cours# mode assistance et duel      |"
-            echo "	-----------------------------------------"
-            echo "		========================="
+            echo "		      =======❓A propos❓======"
+            echo "	-------------------------------------------------------"
+            echo "	|MasterLin — Jeu de quiz Linux                        |"
+            echo "	|4 modules : fichiers, texte, permissions et processus|"
+            echo "	|3 niveaux par module                                 |"
+            echo "	|Questions aléatoires a chaque partie                 |"
+            echo "	|#en cours# mode assistance et duel                   |"
+            echo "	-------------------------------------------------------"
+            echo "		      ========================="
             echo "Appuyez sur Entree pour revenir..."
             read
 
-        elif [ "$choix" = '4' ]; then
+        elif [ "$choix" = '3' ]; then
             clear
             echo "====HISTORIQUE===="
             echo ""
@@ -220,9 +196,8 @@ menu_principal()
 	   	read histo
 	   fi
             	
-        elif [ "$choix" = '5' ]; then
+        elif [ "$choix" = '4' ]; then
         	echo " "
-        	rm -f /tmp/cle_recue.tmp 
         	echo "See you"
             	sleep 2
             	clear
@@ -296,7 +271,7 @@ quizz()
         done
         
         if [ "$reponse" = "q" ]; then
-        	echo "...Vous abandonnez la partie..."
+        	echo "...Vous abandonnez la partie,,,retour au menu principal"
         	sleep 1
         	return 0
         fi
@@ -331,4 +306,3 @@ quizz()
 accueil
 menu_principal
 
-##comparaison avec projet.sh que veut dire les lignes 252 à 255
