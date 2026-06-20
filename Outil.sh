@@ -31,7 +31,7 @@ recevoir_msg () {
         echo "${mon_nom}:${mon_ip}:${reponse_texte}" | nc -w 5 "$ip_dest" "$port_dest"
        fi
        fi
-    fi
+    fi 
     done
 }
 
@@ -49,12 +49,21 @@ ecrire_msg () {
 }
 
 barre_chargement() {
-    echo -n "Chargement : ["
-    for i in {1..25}; do
-        echo -n "#"
+local largeur=25
+local vert="\e[1;32m"
+local jaune="\e[1;33m"
+local reset="\e[0m"
+local rempli=""
+
+echo -ne "${jaune}Chargement : ${reset}["
+    for ((i=1; i<=largeur; i++)); do
+        rempli+="#"
+        local pourcentage=$((i * 100 / largeur))
+        # \r remet le curseur au début de la ligne
+        printf "\r${jaune}Chargement : ${reset}[${vert}%-${largeur}s${reset}] %3d%%" "$rempli" "$pourcentage"
         sleep 0.1
     done
-    echo "] Terminé!"
+    echo -e "  ${vert}Terminé! ${reset}"
 }
 
 notif() {
@@ -68,36 +77,6 @@ notif() {
     espaces=$(printf "%${#message}s" "")
     echo -ne "\e[s\e[1;30H${espaces}\e[u"
 ) &
-}
-
-check_nmap () {
-    local plage
-    plage=$(ip route show | grep default | awk '{print $5}' | xargs ip route show dev | grep -v default | awk '{print $1}')
-    if command -v nmap &>/dev/null; then
-        echo "Les adresses IP des PC connectés disponibles sont :"
-        local my_IP routeur_IP LIGNE NB_MOTS
-        my_IP=$(hostname -I | awk '{printf $1}')
-        routeur_IP=$(ip route show | grep default | awk '{print $3}')
-        LIGNE=$(nmap -PR -sn "$plage" | grep "Nmap scan report for" | grep -v -e "$my_IP" -e "$routeur_IP")
-        NB_MOTS=$(echo "$LIGNE" | wc -w)
-        if [ "$NB_MOTS" -eq 5 ]; then
-            local IP
-            IP=$(echo "$LIGNE" | awk '{print $5}')
-            echo "Inconnu $IP"
-        elif [ "$NB_MOTS" -eq 6 ]; then
-            local HOSTNAME IP
-            HOSTNAME=$(echo "$LIGNE" | awk '{print $5}')
-            IP=$(echo "$LIGNE" | awk '{print $6}' | tr -d '()')
-            echo "$HOSTNAME $IP"
-        fi
-        if [ -z "$(nmap -PR -sn "$plage" | grep "Nmap scan report for" | awk '{print $NF}' | tr -d '()' | grep -v -e "$my_IP" -e "$routeur_IP")" ]; then
-            echo "Vous êtes le seul PC connecté"
-        fi
-    else
-        echo "nmap n'est pas installé. Lancement de l'installation..."
-        installer "nmap"
-        check_nmap
-    fi
 }
 
 installer () {
