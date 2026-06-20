@@ -3,16 +3,23 @@
 affiche_duel()
 {
     clear
-    echo "================================="
-    echo "            MODE DUEL            "
-    echo "================================="
     echo ""
-    echo "    [1] Lancer un round duel    (Joueur A / Serveur)"
-    echo "    [2] Rejoindre un round duel (Joueur B / Client)"
-    echo "    [3] Retour au menu principal"
+    echo -e " ${CORAL}	    ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤${RESET}"
     echo ""
-    echo -n "Entrez votre choix : "
+    echo -e "	${BOLD}${CORAL} 	        M O D E    D U E l ${RESET}"
+    echo ""
+    echo -e " ${CORAL}	   ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤${RESET}"
+    echo ""
+    echo ""
+    echo -e "${CORAL}╔════════════════════════════════════════════════════════════════════╗${RESET}"
+    echo -e "${CORAL}║${RESET}    ${BOLD}${WHITE_BRIGHT}[1]${RESET} Lancer un round duel    (Joueur A / Serveur)               ${RESET} ${CORAL}║${RESET}"
+    echo -e "${CORAL}║${RESET}    ${BOLD}${WHITE_BRIGHT}[2]${RESET} Rejoindre un round duel (Joueur B / Client)                ${RESET} ${CORAL}║${RESET}"
+    echo -e "${CORAL}║${RESET}    ${BOLD}${WHITE_BRIGHT}[3]${RESET} Retour au menu principal                                   ${RESET} ${CORAL}║${RESET}"
+    echo -e "${CORAL}╚════════════════════════════════════════════════════════════════════╝${RESET}"
+    echo ""
+    echo -e -n "      ${INNER_CYAN}FAITES VOTRE CHOIX (1-3) :${RESET} "
     read safidy
+    echo ""
  
     case "$safidy" in
         1)
@@ -20,21 +27,22 @@ affiche_duel()
             [ -z "$IP_LOCAL" ] && IP_LOCAL=$(hostname -I | awk '{print $1}')
             
             echo ""
-            echo "========================================="
-            echo "  TON IP RÉSEAU ACTIVE : $IP_LOCAL"
-            echo "  Port de Duel         : $PORT_DUEL"
-            echo "========================================="
-            echo "[*] Donne cette IP exacte au Joueur B."
+            echo -e "      ${QUIZ_BLUE}╔════════════════════════════════════════════════════════════╗${RESET}"
+    	    echo -e "          ${BOLD}${WHITE_BRIGHT}TON IP RÉSEAU ACTIVE :${RESET} $IP_LOCAL   "                    
+    	    echo -e "          ${BOLD}${WHITE_BRIGHT}Port de Duel         :${RESET} $PORT_DUEL   "                          
+            echo -e "      ${QUIZ_BLUE}╚════════════════════════════════════════════════════════════╝${RESET}"
+            echo ""
+            echo "        [*] Donne cette IP exacte au Joueur B."
             echo ""
             quiz_duel_serveur
             ;;
         2)
             local ip_serveur=""
-            echo "Entrez l'IP du serveur (Joueur A) (Vous devez être sur le même réseau): "
-            echo "ou tapez sur ENTREE pour quitter..."
+            echo -e "${BOLD}Entrez l'IP du serveur (Joueur A) (Vous devez être sur le même réseau): "
+            echo -e "ou tapez sur ENTREE pour quitter...${RESET}"
             read ip_serveur
             if [ -z "$ip_serveur" ]; then
-                echo "IP vide. Annulation."
+                echo -e "${RED_BRIGHT}IP vide. Annulation.${RESET}"
                 sleep 1
                 return
             fi
@@ -44,7 +52,7 @@ affiche_duel()
             return 0
             ;;
         *)
-            echo "Choix invalide."
+            echo -e "${BOLD}${RED_BRIGHT }Choix invalide.${RESET}"
             sleep 1
             ;;
     esac
@@ -89,7 +97,7 @@ quiz_duel_serveur()
     local fichier_question="questions/questionsduel.csv"
     [ ! -f "$fichier_question" ] && fichier_question="questionsduel.csv"
     if [ ! -f "$fichier_question" ]; then
-        echo "Fichier questionsduel.csv introuvable !"
+        echo -e "${RED_BRIGHT}Fichier questionsduel.csv introuvable !${RESET}"
         read -rp "Appuyez sur ENTREE..." </dev/tty
         return 1
     fi
@@ -98,7 +106,7 @@ quiz_duel_serveur()
  
     local total=${#QUESTIONS[@]} #total = au nombre case du tableau QUESTIONS généré par mapfile
     if [ "$total" -eq 0 ]; then
-        echo "Aucune question trouvée dans le fichier CSV."
+        echo -e "${RED_BRIGHT}Aucune question trouvée dans le fichier CSV.${RESET}"
         read -rp "Appuyez sur ENTREE..." </dev/tty
         return 1
     fi
@@ -109,11 +117,10 @@ quiz_duel_serveur()
  
     echo ""
     echo ""
-    echo "=== DUEL — Joueur A (Serveur) ==="
-    echo "[*] En attente du Joueur B..."
+    echo -e "${BOLD}[*] En attente du Joueur B..."
     echo ""
     read -rp "Appuyez sur ENTREE pour ouvrir la session de jeu... " </dev/tty
- 
+    echo -e "${RESET}"
     mkdir -p duel
  
     while [ $numeroquest -le $total ]; do
@@ -145,7 +152,7 @@ quiz_duel_serveur()
         local tmp_rep="/tmp/duel_repA_${numeroquest}_$$"
         rm -f "$tmp_qst" "$tmp_rep"
  
-        # Connexion locale du Joueur A au serveur C
+        # Connexion locale du Joueur A au serveur C10.42.0.153
         "$CLIENT_DUEL" "127.0.0.1" "$PORT_DUEL" "$tmp_qst" "$tmp_rep" > /dev/null 2>&1 &
  
         # Attente que le client local reçoive le bloc de la question
@@ -157,27 +164,36 @@ quiz_duel_serveur()
  
         # Interface graphique terminal du joueur A
         clear
-        echo "=== Question $numeroquest/$total ==="
-        echo "(Score actuel => Toi : $score_A  |  Adversaire : $score_B)"
-        echo "-----------------------------------------"
+        echo -e "${CORAL}	        === Question $numeroquest/$total ===	${RESET}"
+        echo -e "${CORAL}╔════════════════════════════════════════════════════════════════════╗${RESET}"
+    	echo -e "                 Score actuel => Toi : $score_A  |  Adversaire : $score_B "
+    	echo -e "${CORAL}╚════════════════════════════════════════════════════════════════════╝${RESET}"
+        echo ""
+        echo -e "${BOLD}=================================================================================${RESET}"
         echo " $question"
         echo "  [1] $C1"
         echo "  [2] $C2"
         echo "  [3] $C3"
         echo "  [4] $C4"
-        echo "-----------------------------------------"
+        echo -e "${BOLD}=================================================================================${RESET}"
         echo ""
  
         local reponse_A=""
-        read -rp "Votre réponse (1-4) ou 'q' pour abandonner : " reponse_A </dev/tty
-        while [[ "$reponse_A" != [1-4] && "$reponse_A" != "q" ]]; do
-            read -rp "Saisie incorrecte (1-4/q) : " reponse_A </dev/tty
+        echo -e -n "${BOLD}Votre réponse? (1-4) ou 'q' pour quitter ❯ ${RESET} "
+        read reponse_A < /dev/tty
+        while [ "$reponse_A" != '1' -a "$reponse_A" != '2' -a "$reponse_A" != '3' -a "$reponse_A" != '4' -a "$reponse_A" != 'q' ]; do
+            echo "Option invalide"
+            sleep 1
+            echo -e -n "${BOLD}Votre réponse? (1-4) ou 'q' ❯${RESET} "
+            read reponse_A < /dev/tty
         done
-
-        if [ "$reponse_A" = "q" ]; then
-            echo "Fin du match par abandon."
-            nettoyage_duel
-            return 0
+	
+	if [ "$reponse_A" = "q" ]; then
+        	echo ""
+        	echo -e "${BOLD}${GRAY}...Fin du match par abandon...${RESET}"
+        	nettoyage_duel
+        	sleep 1
+        	return 0
         fi
  
         # Envoi de la réponse au client1 via le fichier tampon
@@ -195,23 +211,25 @@ quiz_duel_serveur()
         vainqueur_round=$(grep -o 'VAINQUEUR:[A-Z]*' "$tmp_qst" 2>/dev/null | cut -d':' -f2)
  
         case "$vainqueur_round" in
-            A)     score_A=$((score_A + 1)); echo -e "\n +1 Point ! Tu as été le plus rapide !" ;;
-            B)     score_B=$((score_B + 1)); echo -e "\n Le Joueur B a répondu plus vite !" ;;
-            AUCUN) echo -e "\n Aucun joueur n'a donné la bonne réponse." ;;
-            *)     echo -e "\n Le Joueur B a expiré (Timeout)." ;;
+            A)     score_A=$((score_A + 1)); echo -e "${GREEN}\n +1 Point ! Tu as été le plus rapide !${RESET}" ;;
+            B)     score_B=$((score_B + 1)); echo -e "${GREEN}\n Le Joueur B a répondu plus vite !${RESET}" ;;
+            AUCUN) echo -e "${PURPLE}\n Aucun joueur n'a donné la bonne réponse.${RESET}" ;;
+            *)     echo -e "${PURPLE}\n Le Joueur B a expiré (Timeout).${RESET}" ;;
         esac
  
         local diff_us
         diff_us=$(grep -o 'DIFF:[0-9]*' "$tmp_qst" 2>/dev/null | cut -d':' -f2)
         if [ -n "$diff_us" ] && [ "$diff_us" != "0" ]; then
-            echo "  ⏱ Écart de réactivité : $(( diff_us / 1000 )) ms"
+            echo -e "${GOLD_AMBER}  ⏱ Écart de réactivité : $(( diff_us / 1000 )) ms${RESET}"
         fi
  
         rm -f "$tmp_qst" "$tmp_rep" /tmp/duel_srv_$$.log
  
         if [ $numeroquest -lt $total ]; then
             echo ""
+            echo -e "${BOLD}"
             read -rp "Appuyez sur [ENTREE] pour générer le round suivant..." </dev/tty
+            echo -e "${RESET}"
         fi
  
         numeroquest=$((numeroquest + 1))
@@ -233,9 +251,11 @@ quiz_duel_client()
     local score_B=0
  
     clear
+    echo -e "${BOLD}"
     echo "=== DUEL — Joueur B (Client) ==="
     echo "[*] Cible de connexion -> $ip:$PORT_DUEL"
     echo ""
+    echo -e "${RESET}"
  
     while [ $numeroquest -le $total ]; do
         local tmp_qst="/tmp/duel_qstB_${numeroquest}_$$"
@@ -243,10 +263,9 @@ quiz_duel_client()
         rm -f "$tmp_qst" "$tmp_rep"
  
         clear
-        echo "=== Question $numeroquest/$total ==="
-        echo "(Score actuel => Adversaire : $score_A  |  Toi : $score_B)"
-        echo "-----------------------------------------"
+        echo -e "${BOLD}"
         echo "Connexion réseau vers le Serveur distant..."
+        echo -e "${RESET}"
  
         # Tentative de poignée de main avec le serveur A
         "$CLIENT_DUEL" "$ip" "$PORT_DUEL" "$tmp_qst" "$tmp_rep" > /dev/null 2>&1 &
@@ -261,8 +280,8 @@ quiz_duel_client()
         # Gestion des désynchronisations réseau : si A n'est pas prêt, on boucle sur le même round
         if [ $attente -ge 100 ]; then
             echo ""
-            echo "⚠️  Serveur distant indisponible ou round non généré."
-            echo "Synchronisation en cours, nouvelle tentative automatique..."
+            echo -e "${BOLD}${RED_BRIGHT} ! ! ! ${RESET}${RED_BRIGHT}Serveur distant indisponible ou round non généré.${RESET}"
+            echo -e "${BOLD}Synchronisation en cours, nouvelle tentative auto..."
             killall -9 client1 2>/dev/null
             rm -f "$tmp_qst" "$tmp_rep"
             sleep 2
@@ -271,18 +290,34 @@ quiz_duel_client()
  
         # Affichage de la question reçue via le réseau
         clear
-        echo "=== Question $numeroquest/$total ==="
-        echo "(Score actuel => Joueur A : $score_A  |  Toi : $score_B)"
-        echo "-----------------------------------------"
-        grep -v "QUESTION_PRETE\|VAINQUEUR\|DIFF" "$tmp_qst" 2>/dev/null
-        echo "-----------------------------------------"
+        echo -e "${CORAL}	        === Question $numeroquest/$total ===	${RESET}"
+        echo -e "${CORAL}╔════════════════════════════════════════════════════════════════════╗${RESET}"
+    	echo -e "                  Score actuel => Adversaire : $score_A  |  Toi : $score_B               "
+    	echo -e "${CORAL}╚════════════════════════════════════════════════════════════════════╝${RESET}"
         echo ""
- 
+        echo -e "${BOLD}=================================================================================${RESET}"
+        grep -v "QUESTION_PRETE\|VAINQUEUR\|DIFF" "$tmp_qst" 2>/dev/null
+        echo -e "${BOLD}=================================================================================${RESET}"
+        echo ""
+        
         local reponse_B=""
-        read -rp "Votre réponse (1-4) ou 'q' pour abandonner : " reponse_B </dev/tty
-        while [[ "$reponse_B" != [1-4] && "$reponse_B" != "q" ]]; do
-            read -rp "Saisie incorrecte (1-4/q) : " reponse_B </dev/tty
+        echo -e -n "${BOLD}Votre réponse? (1-4) ou 'q' pour quitter ❯ ${RESET} "
+        read reponse_B < /dev/tty
+
+        while [ "$reponse_B" != '1' -a "$reponse_B" != '2' -a "$reponse_B" != '3' -a "$reponse_B" != '4' -a "$reponse_B" != 'q' ]; do
+            echo "Option invalide"
+            sleep 1
+            echo -e -n "${BOLD}Votre réponse? (1-4) ou 'q' ❯${RESET} "
+            read reponse_B < /dev/tty
         done
+	
+	if [ "$reponse_B" = "q" ]; then
+        	echo ""
+        	echo -e "${BOLD}${GRAY}...Fin du match par abandon...${RESET}"
+        	nettoyage_duel
+        	sleep 1
+        	return 0
+        fi
         
         if [ "$reponse_B" = "q" ]; then
             echo "Fin du match par abandon."
@@ -304,24 +339,27 @@ quiz_duel_client()
         vainqueur_round=$(grep -o 'VAINQUEUR:[A-Z]*' "$tmp_qst" 2>/dev/null | cut -d':' -f2)
  
         case "$vainqueur_round" in
-            A)     score_A=$((score_A + 1)); echo -e "\n Le Joueur A a été plus rapide !" ;;
-            B)     score_B=$((score_B + 1)); echo -e "\n +1 Point ! Tu as été le plus rapide !" ;;
-            AUCUN) echo -e "\n Aucun point attribué sur ce round." ;;
-            *)     echo -e "\n Erreur de synchronisation sur ce round." ;;
+            A)     score_A=$((score_A + 1)); echo -e "${GREEN}\n Le Joueur A a été plus rapide !${RESET}" ;;
+            B)     score_B=$((score_B + 1)); echo -e "${GREEN}\n +1 Point ! Tu as été le plus rapide !${RESET}" ;;
+            AUCUN) echo -e "${PURPLE}\n Aucun point attribué sur ce round.${RESET}" ;;
+            *)     echo -e "${PURPLE}\n Erreur de synchronisation sur ce round.${RESET}" ;;
         esac
  
         local diff_us
         diff_us=$(grep -o 'DIFF:[0-9]*' "$tmp_qst" 2>/dev/null | cut -d':' -f2)
         if [ -n "$diff_us" ] && [ "$diff_us" != "0" ]; then
-            echo "  ⏱ Écart de réactivité : $(( diff_us / 1000 )) ms"
+            echo -e "${GOLD_AMBER}  ⏱ Écart de réactivité : $(( diff_us / 1000 )) ms${RESET}"
         fi
  
         rm -f "$tmp_qst" "$tmp_rep"
  
         if [ $numeroquest -lt $total ]; then
             echo ""
+            echo -e "${BOLD}"
             read -rp "Appuyez sur [ENTREE] pour vous synchroniser sur le round suivant..." </dev/tty
+            echo -e "${RESET}"
         fi
+        
  
         numeroquest=$((numeroquest + 1))
     done
@@ -337,23 +375,27 @@ afficher_resultat_final()
     local total=$3
  
     clear
-    echo "══════════════════════════"
-    echo "   RÉSULTAT FINAL DU DUEL"
-    echo "══════════════════════════"
-    echo "  Joueur A (serveur) : $score_A / $total"
-    echo "  Joueur B (client)  : $score_B / $total"
+    echo ""
+    echo -e "${QUIZ_BLUE}╔════════════════════════════════════════════════════════════════════╗${RESET}"
+    echo -e "${QUIZ_BLUE}║${RESET} ${BANNER_QUIZ}     R E S U L T A T      Q U I Z Z                               ${RESET} ${QUIZ_BLUE}║${RESET}"
+    echo -e "${QUIZ_BLUE}╚════════════════════════════════════════════════════════════════════╝${RESET}"
+    echo ""
+    echo -e "      ${CYAN_LIGHT}╔══════════════════════════════════════╗${RESET}"
+    echo -e "      ${CYAN_LIGHT}║${RESET}    ${BOLD}${WHITE_BRIGHT}Joueur A (serveur) : ${RESET}$score_A / $total       ${CYAN_LIGHT} ║${RESET}"
+    echo -e "      ${CYAN_LIGHT}║${RESET}    ${BOLD}${WHITE_BRIGHT}Joueur B (client) : ${RESET}$score_B / $total        ${CYAN_LIGHT} ║${RESET}"
+    echo -e "      ${CYAN_LIGHT}╚══════════════════════════════════════╝${RESET}"
     echo ""
     
     local verdict=""
     
     if [ "$score_A" -gt "$score_B" ]; then
-        echo "  🏆 VICTOIRE de A !"
+        echo -e "${GOLD_AMBER} ദ്ദി(˵ •̀ ᴗ - ˵ )${RESET}${BOLD}${QUIZ_BLUE} VICTOIRE de A !${RESET}"
         verdict="VICTOIRE A"
     elif [ "$score_B" -gt "$score_A" ]; then
-        echo "  🏆 VICTOIRE de B !"
+        echo -e "${GOLD_AMBER} ദ്ദി(˵ •̀ ᴗ - ˵ )${RESET}${BOLD}${QUIZ_BLUE} VICTOIRE de B !${RESET}"
         verdict="VICTOIRE B"
     else
-        echo "  🤝 ÉGALITÉ !"
+        echo -e "${GOLD_AMBER} ദ്ദി(˵ •̀ ᴗ - ˵ )${RESET}${BOLD}${QUIZ_BLUE} ÉGALITÉ !${RESET}"
         verdict="EGALITE"
     fi
     
@@ -364,5 +406,7 @@ afficher_resultat_final()
 
 
     echo ""
+    echo -e "${BOLD}"
     read -rp "Appuyez sur ENTREE pour revenir au menu..." _ </dev/tty
+    echo -e "${RESET}"
 }
