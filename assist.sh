@@ -1,5 +1,5 @@
 #!/bin/bash
-source ./Outils.sh
+source ./Outil.sh
 assist () {
 if [ -n "$pid_msg1" ]; then
         kill "$pid_msg1" 2>/dev/null
@@ -21,9 +21,8 @@ fi
 # Vérifier si le Wi-Fi est connecté (operstate = up)
 if [ "$(cat /sys/class/net/$wifi_interface/operstate)" = "up" ]; then
     echo "Connecté à un réseau sans fil (WLAN) via $wifi_interface"
-   check_nc   
+   check_nc
    check_audio
-   check_nmap 
    echo "Sur lequel de ces pc voulez vous choisir comme assistant?"
    read -p "IP : " ip_pc2
    sleep 2
