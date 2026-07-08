@@ -131,4 +131,4 @@ sudo dpkg -r masterlin
 ```
 ## Pour récupérer le .deb
 
-Veuillez contacter un de nous 4 😆
+Veuillez contacter un de nous 4 😉
