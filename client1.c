@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     if (connect(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
         perror("connect"); close(sock); return 1;
     }
-
+    
     /* Recevoir la question */
     char buf[MAX_BUF];
     memset(buf, 0, sizeof(buf));

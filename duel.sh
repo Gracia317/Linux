@@ -23,41 +23,91 @@ affiche_duel()
  
     case "$safidy" in
         1)
-            IP_LOCAL=$(ip route get 1.1.1.1 2>/dev/null | awk '{print $7}' | head -n 1)
-            [ -z "$IP_LOCAL" ] && IP_LOCAL=$(hostname -I | awk '{print $1}')
+            #IP_LOCAL=$(ip route get 1.1.1.1 2>/dev/null | awk '{print $7}' | head -n 1)
+            #[ -z "$IP_LOCAL" ] && IP_LOCAL=$(hostname -I | awk '{print $1}')
             
-            echo ""
-            echo -e "      ${QUIZ_BLUE}╔════════════════════════════════════════════════════════════╗${RESET}"
-    	    echo -e "          ${BOLD}${WHITE_BRIGHT}TON IP RÉSEAU ACTIVE :${RESET} $IP_LOCAL   "                    
-    	    echo -e "          ${BOLD}${WHITE_BRIGHT}Port de Duel         :${RESET} $PORT_DUEL   "                          
-            echo -e "      ${QUIZ_BLUE}╚════════════════════════════════════════════════════════════╝${RESET}"
-            echo ""
-            echo "        [*] Donne cette IP exacte au Joueur B."
-            echo ""
+           # echo ""
+            #echo -e "      ${QUIZ_BLUE}╔════════════════════════════════════════════════════════════╗${RESET}"
+    	    #echo -e "          ${BOLD}${WHITE_BRIGHT}TON IP RÉSEAU ACTIVE :${RESET} $IP_LOCAL   "                    
+    	    #echo -e "          ${BOLD}${WHITE_BRIGHT}Port de Duel         :${RESET} $PORT_DUEL   "                          
+            #echo -e "      ${QUIZ_BLUE}╚════════════════════════════════════════════════════════════╝${RESET}"
+            #echo ""
+            #echo "        [*] Donne cette IP exacte au Joueur B."
+            #echo ""
             quiz_duel_serveur
             ;;
         2)
             local ip_serveur=""
-            echo -e "${BOLD}Entrez l'IP du serveur (Joueur A) (Vous devez être sur le même réseau): "
-            echo -e "ou tapez sur ENTREE pour quitter...${RESET}"
-            read ip_serveur
-            if [ -z "$ip_serveur" ]; then
-                echo -e "${RED_BRIGHT}IP vide. Annulation.${RESET}"
-                sleep 1
-                return
+            wifi_interface=$(ls /sys/class/net | grep -E '^wl')
+
+            if [ -z "$wifi_interface" ]; then
+                echo -e "${RED_BRIGHT}Pas de carte Wi-Fi détectée.${RESET}"
+                exit 1
             fi
-            quiz_duel_client "$ip_serveur"
+
+            # Vérifier si le Wi-Fi est connecté (operstate = up)
+            if [ "$(cat /sys/class/net/$wifi_interface/operstate)" = "up" ]; then
+                echo -e "        ${CYAN}Connecté à un réseau sans fil (WLAN) via ${RESET} $wifi_interface"
+                check_nc
+                check_audio
+                echo "              Recherche des joueurs sur le réseau..."
+                echo ""
+                sleep 4    # Laisser le temps au premier cycle d'envoie_annonce de finir
+                nettoyer_joueurs_inactifs
+
+                if [ ! -s "$fichier_joueur" ]; then
+                    echo -e "${YELLOW}Aucun joueur détecté.${RESET}"
+                    echo -e "${GRAY}Appuyez sur Entrée pour relancer la recherche ou 'q' pour quitter${RESET}"
+                    read rep < /dev/tty
+                    if [ "$rep" = "q" ]; then
+                        return
+                    else
+                        affiche_duel  # Relancer la recherche
+                        return
+                    fi
+                fi
+
+                # --- AFFICHAGE DES JOUEURS CONNECTÉS (Comme dans assist.sh) ---
+                echo -e "${UNDERLINE}${BOLD}Joueurs disponibles :${RESET}"
+                echo -e "${BOLD}---------------------${RESET}"
+                awk -F ':' '{printf "[%s]  %s\n", $2, $3}' "$fichier_joueur"
+                echo -e "${BOLD}---------------------${RESET}"
+                echo ""
+                echo -e "${BOLD}Avec quel joueur voulez-vous faire un duel ? ${UNDERLINE}ou${RESET} ${BOLD}Appuyer sur [ENTREE] pour quitter${RESET}"
+                read -p "Entrez son IP : " ip_serveur
+                echo ""
+
+            else     
+                # Si le Wi-Fi n'est pas "up", saisie manuelle de secours
+                echo -e "${BOLD}Entrez l'IP du serveur (Joueur A) (Vous devez être sur le même réseau) : ${RESET}"
+                echo -e "${BOLD}ou tapez sur ENTREE pour quitter...${RESET}"
+                read ip_serveur
+            fi
+
+            # Validation de l'IP choisie ou saisie
+            if [ -z "$ip_serveur" ]; then
+                return 0
+            else
+                ping -c 1 -w 1 "$ip_serveur" > /dev/null 2>&1 
+                if [ $? -ne 0 ]; then
+                    echo -e "${RED_BRIGHT}Non connecté à cette IP ou IP inexistante${RESET}"
+                    sleep 2
+                    return 1
+                else
+                    sleep 2
+                    quiz_duel_client "$ip_serveur"
+                fi
+            fi
             ;;
         3)
             return 0
             ;;
         *)
-            echo -e "${BOLD}${RED_BRIGHT }Choix invalide.${RESET}"
+            echo -e "${BOLD}${RED_BRIGHT}Choix invalide.${RESET}"
             sleep 1
             ;;
     esac
-}
- 
+} 
 compiler_duel()
 {
     if [ ! -f "./serveur1" ] || [ ! -f "./client1" ]; then
@@ -92,7 +142,7 @@ nettoyage_duel()
 quiz_duel_serveur()
 {
     compiler_duel || return 1
-    nettoyage_duel # Nettoyage préventif
+    #nettoyage_duel # Nettoyage préventif
  
     local fichier_question="questions/questionsduel.csv"
     [ ! -f "$fichier_question" ] && fichier_question="questionsduel.csv"
@@ -402,9 +452,8 @@ afficher_resultat_final()
 
     # Écrire dans l'historique duel
     echo "$(date '+%d/%m/%Y %H:%M') | $prenom | A:$score_A B:$score_B sur $total | $verdict" \
-        >> MasterLin/historique_duel.txt
-
-
+        >> /var/log/masterlin/historique_duel.txt
+    
     echo ""
     echo -e "${BOLD}"
     read -rp "Appuyez sur ENTREE pour revenir au menu..." _ </dev/tty

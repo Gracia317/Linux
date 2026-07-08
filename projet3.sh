@@ -1,14 +1,42 @@
 #!/bin/bash
 #script bash du jeu
 
+#Encore besoin de .conf qui contient les valeurs des pors sns
+source ./Outil.sh	# port et ip, barre de chargem et notif, nc, audio, tmux
 source ./score.sh	#contient les fichier de progressions, et score etc;;;
-source ./Outil.sh	# port et ip, barre de chargem et notif, notif, checknmap, installation nmap, nc
 source ./Menu.sh
 source ./assist.sh
 source ./duel.sh
+source ./quotidien.sh
 SERVEUR_DUEL="./serveur1"
 CLIENT_DUEL="./client1"
 PORT_DUEL=9000
+
+# =================================================================
+# AUTO-PROJECTION DANS TMUX POUR LE MODE CLI
+# =================================================================
+if [ -z "$DISPLAY" ]; then
+    # Si on n'est pas déjà dans une session tmux
+    if [ -z "$TMUX" ]; then
+        check_tmux # Vérifie/installe tmux via Outil.sh
+        
+        # Lance une nouvelle session tmux nommée 'MasterLin' et y exécute ce même script
+        tmux new-session -s "MasterLin" -A "$0"
+        exit 0 # Quitte l'instance hors-tmux actuelle
+    fi
+fi
+
+nettoyage_interruption() {
+    arreter_ecoute "$PORT1" 2>/dev/null
+    arreter_ecoute "$PORT2" 2>/dev/null
+    if [ -n "$TMUX" ]; then
+        tmux kill-session -t "MasterLin" 2>/dev/null
+    fi
+    exit 1
+}
+
+# Capture le signal de fermeture (SIGINT = Ctrl+C, SIGTERM = arrêt propre)
+trap nettoyage_interruption SIGINT SIGTERM
 
 #==============================================================
 #			Styles et couleurs
@@ -36,7 +64,7 @@ WHITE_BRIGHT="\033[97m"
 
 # Alertes et Confirmations
 RED_BRIGHT="\033[91m"       
-GREEN_BRIGHT="\033[92m"QUIZ_BLUE
+GREEN_BRIGHT="\033[92m"
 
 # Styles des Bandeaux pleins
 BANNER_QUIZ="\033[1;48;5;214;30m"
@@ -61,56 +89,14 @@ prenom=""
 Theme_actuel=""
 numero_theme=""
 minimum=60
+export fichier_joueur="/tmp/Joueurs"
+touch "$fichier_joueur"
 export PORT1=6855
 export PORT2=5586
+export PORT3=7000
 
-recevoir_msg "$PORT1" &
-pid_msg1=$!
-
-connexion_joueur() {
-    local prenom=$1
-    echo -e "      ${QUIZ_BLUE}╔══════════════════════════════════════╗${RESET}"
-    echo -e "      ${QUIZ_BLUE}║${RESET}    ${BOLD}${WHITE_BRIGHT}JOUEUR EXISTANT !${RESET}                 ${QUIZ_BLUE}║${RESET}"  
-    echo -e "      ${QUIZ_BLUE}╚══════════════════════════════════════╝${RESET}"
-    echo -e -n "      ${BOLD}${WHITE_BRIGHT}Entrez votre mot de passe (secret) : ${RESET}"
-    read -s mot_de_passe    
-    echo ""
-    
-    local saisi=$(echo -n "$mot_de_passe" | sha256sum | cut -d' ' -f1)
-    local stocke=$(grep "^$prenom:" MasterLin/password.txt | cut -d ':' -f2)
-   
-    local tentative=0
-    while [ "$saisi" != "$stocke" ]; do
-        tentative=$(( tentative + 1 ))
-        if [ "$tentative" -eq 5 ]; then
-            echo -e "${RED_BRIGHT}Mot de passe oublié après 5 tentatives?${RESET}"
-            echo -e "${GREEN_BRIGHT}Veuillez saisir un tout nouveau mot de passe:${RESET}"
-            read -s mot_de_passe
-            echo ""
-            nouveau=$(echo -n "$mot_de_passe" | sha256sum | cut -d' ' -f1)
-            
-            sed -i "s/^$prenom:.*/$prenom:$nouveau/" MasterLin/password.txt
-            
-            echo -e "${BOLD}${WHITE_BRIGHT}Mot de passe changé avec succès !${RESET}"
-            break
-        fi
-            echo ""
-            echo -e "      ${RED_BRIGHT}Mot de passe incorrect !${RESET}"
-            echo -e "      ${RED_BRIGHT}╔══════════════════════════════════════╗${RESET}"
-            echo -e "      ${RED_BRIGHT}║${RESET}    ${BOLD}${WHITE_BRIGHT}SECURITE - VERIFICATION${RESET}           ${RED_BRIGHT}║${RESET}"
-            echo -e "      ${RED_BRIGHT}╚══════════════════════════════════════╝${RESET}"
-            echo -e -n "      ${BOLD}${WHITE_BRIGHT}Veuillez reessayer : ${RESET}"
-            read -s mot_de_passe
-            echo ""
-        saisi=$(echo -n "$mot_de_passe" | sha256sum | cut -d' ' -f1)
-    done
-    
-	echo ""
-        echo -e "      ${GOLD_AMBER}===================================================${RESET}"
-        echo -e "         ${BOLD}${WHITE_BRIGHT}REBONJOUR ${CYAN_LIGHT}$prenom${WHITE_BRIGHT} ! DE RETOUR DANS LE JEU ?${RESET}"
-        echo -e "      ${GOLD_AMBER}===================================================${RESET}"
-        echo ""
-}
+export TMUX_PANE_CIBLE="$TMUX_PANE"
+pid_msg1=$(demarrer_ecoute "$PORT1")
 
 accueil() {
     clear
@@ -129,70 +115,106 @@ accueil() {
     echo -e "${QUIZ_BLUE}╚════════════════════════════════════════════════════════════════════╝${RESET}"
     echo ""
 
-    if [ ! -d MasterLin ]; then
-        mkdir MasterLin
-        touch MasterLin/password.txt
-        chmod 600 MasterLin/password.txt
-    fi
-
     echo -e "${WHITE_BRIGHT}${BOLD}${UNDERLINE}Les joueurs existants:${RESET}"
     echo -e "${BOLD} ${QUIZ_BLUE}"
-    awk -F ':' '{printf "==>%s\n",$1}' MasterLin/password.txt
-    echo ""
+   
+   # 1. Lire, trier par ordre alphabétique et stocker dans un tableau Bash
+    declare -A liste_joueurs
+    local compteur=1
+
+    if [ -s /var/log/masterlin/players.txt ]; then
+        while IFS= read -r nom_trie; do
+            [ -z "$nom_trie" ] && continue
+            liste_joueurs[$compteur]="$nom_trie"
+            echo -e "   [${compteur}] ==> $nom_trie"
+            compteur=$((compteur + 1))
+        done < <(sort -f /var/log/masterlin/players.txt)
+    else
+        echo -e "   (Aucun joueur enregistré pour le moment)"
+    fi
     echo -e "${RESET}"
 
-    echo -e "${BOLD}${WHITE_BRIGHT}Entrer votre nom de joueur ou créez-en un nouveau:"${RESET}
-    read prenom
+    echo -e "${BOLD}${WHITE_BRIGHT}Entrez le NUMÉRO de votre joueur ou écrivez un NOUVEAU NOM, ou 'suppr' pour supprimer un joueur :${RESET}"
+    read -r saisie
     echo ""
 
-    # Si le joueur existe
-    if grep -q "^$prenom:" MasterLin/password.txt ; then
-        connexion_joueur "$prenom"
+    if [ "$saisie" = "suppr" ]; then
+    	supprimer_joueur
+    	accueil
+    	return
+    fi
+    
+     if [[ "$saisie" =~ ^[0-9]+$ ]] && [ -n "${liste_joueurs[$saisie]}" ]; then
+        prenom="${liste_joueurs[$saisie]}"
+        echo -e "${GREEN_BRIGHT}Joueur sélectionné : ${BOLD}$prenom${RESET}"
     else
-    	echo ""
-        echo -e "${RED_BRIGHT}Ce nom ne correspond à aucun joueur existant. Créer un nouveau joueur?${RESET}"
-        echo -e "[o] oui    [n] non    [autre] pour quitter"
-        read noui
-        case $noui in
-            o|O)
-            	echo ""
-            	echo -e "      ${CYAN_LIGHT}╔══════════════════════════════════════╗${RESET}"
-        	echo -e "      ${CYAN_LIGHT}║${RESET}    ${BOLD}${WHITE_BRIGHT}NOUVEAU JOUEUR DETECTE !${RESET}         ${CYAN_LIGHT} ║${RESET}"
-        	echo -e "      ${CYAN_LIGHT}╚══════════════════════════════════════╝${RESET}"
-                echo -e -n "${BOLD}${WHITE_BRIGHT} Entrez votre mot de passe: ${RESET}"
-                read -s mot_de_passe
-                echo ""
-                pwd_hash=$(echo -n "$mot_de_passe" | sha256sum | cut -d ' ' -f1)
-                echo "$prenom:$pwd_hash" >> MasterLin/password.txt
-                echo ""
-        	echo -e "      ${GOLD_AMBER}===================================================${RESET}"
-        	echo -e "         ${BOLD}${WHITE_BRIGHT}HELLO ${CYAN_LIGHT}$prenom${WHITE_BRIGHT} ! ARE YOU READY ?${RESET}"
-        	echo -e "      ${GOLD_AMBER}===================================================${RESET}"
-        	echo ""
-                ;;
-                
-            n|N)
-            	echo ""
-                echo -e "${RED_BRIGHT}Veuillez entrer un nom de joueur existant...${RESET}"
-                read prenom
-                if grep -q "^$prenom:" MasterLin/password.txt ; then
-                    connexion_joueur "$prenom"
-                else
-                    echo -e "${BOLD}${RED_BRIGHT}Joueur introuvable. Fin du programme.${RESET}"
-                    exit 1
-                fi
-                ;;
-                
-            *)
-                echo -e "${BOLD}${RED_BRIGHT}Choix invalide.${RESET}"
-                exit 1
-                ;;
-        esac
+        # 4. Traitement s'il s'agit d'un nouveau nom de joueur
+        prenom="$saisie"
+ 
+        if grep -qx "$prenom" /var/log/masterlin/players.txt; then
+            echo -e "${GREEN_BRIGHT}Joueur '${BOLD}$prenom${RESET}${GREEN_BRIGHT}' reconnu. Bienvenue !${RESET}"
+            echo ""
+        else
+            echo "$prenom" >> /var/log/masterlin/players.txt
+            echo ""
+            echo -e "      ${GOLD_AMBER}===================================================${RESET}"
+            echo -e "         ${BOLD}${WHITE_BRIGHT}HELLO ${CYAN_LIGHT}$prenom${WHITE_BRIGHT} ! ARE YOU READY ?${RESET}"
+            echo -e "      ${GOLD_AMBER}===================================================${RESET}"
+            echo ""
+        fi
     fi
 
     init_progression
     barre_chargement
     sleep 1
+}
+
+supprimer_joueur() {
+    echo ""
+    echo -e "      ${RED_BRIGHT}╔══════════════════════════════════════╗${RESET}"
+    echo -e "      ${RED_BRIGHT}║${RESET}    ${BOLD}${WHITE_BRIGHT}SUPPRESSION D'UN JOUEUR${RESET}           ${RED_BRIGHT}║${RESET}"
+    echo -e "      ${RED_BRIGHT}╚══════════════════════════════════════╝${RESET}"
+ 
+    if [ ! -s /var/log/masterlin/players.txt ]; then
+        echo -e "      ${RED_BRIGHT}Aucun joueur à supprimer.${RESET}"
+        sleep 2
+        return
+    fi
+ 
+    declare -A liste_suppr
+    local compteur=1
+    while IFS= read -r nom_trie; do
+        [ -z "$nom_trie" ] && continue
+        liste_suppr[$compteur]="$nom_trie"
+        echo -e "   [${compteur}] ==> $nom_trie"
+        compteur=$((compteur + 1))
+    done < <(sort -f MasterLin/players.txt)
+ 
+    echo -e -n "${BOLD}${WHITE_BRIGHT}Numéro du joueur à supprimer (ou 'annuler') : ${RESET}"
+    read -r num_suppr
+    echo ""
+ 
+    if [ "$num_suppr" = "annuler" ]; then
+        echo -e "      ${GOLD_AMBER}Suppression annulée.${RESET}"
+        sleep 1
+        return
+    fi
+ 
+    if [[ "$num_suppr" =~ ^[0-9]+$ ]] && [ -n "${liste_suppr[$num_suppr]}" ]; then
+        local nom_cible="${liste_suppr[$num_suppr]}"
+        echo -e -n "${RED_BRIGHT}Confirmer la suppression de ${BOLD}$nom_cible${RESET}${RED_BRIGHT} ? (o/n) : ${RESET}"
+        read -r confirmation
+        if [ "$confirmation" = "o" ] || [ "$confirmation" = "O" ]; then
+            sed -i "/^${nom_cible}$/d" /var/log/masterlin/players.txt
+            rm -rf /var/log/masterlin/progression_${nom_cible}.txt 2>/dev/null
+            echo -e "      ${GREEN_BRIGHT}Joueur '${BOLD}$nom_cible${RESET}${GREEN_BRIGHT}' supprimé.${RESET}"
+        else
+            echo -e "      ${GOLD_AMBER}Suppression annulée.${RESET}"
+        fi
+    else
+        echo -e "      ${RED_BRIGHT}Numéro invalide.${RESET}"
+    fi
+    sleep 2
 }
 
 menu_principal()
@@ -251,7 +273,7 @@ menu_principal()
             echo -e "        Mode assistance pour les quiz guidés et Mode duel pour un 1v1"
             echo -e "      ${GOLD_AMBER}===================================================${RESET}"
             echo ""
-            echo -e "      Appuyez sur Entree pour revenir au menu..."
+            echo -e "      Appuyez sur [Entree] pour revenir au menu..."
             read
 
         elif [ "$choix" = '3' ]; then
@@ -289,24 +311,24 @@ menu_principal()
             done
             
             if [ "$histo" = '1' ]; then
-                if [ -f MasterLin/historique.txt ]; then
+                if [ -f /var/log/masterlin/historique.txt ]; then
                     echo -e "      ${CYAN_LIGHT}--- SCORES SOLO ---${RESET}"
-                    cat MasterLin/historique.txt
+                    cat /var/log/masterlin/historique.txt
                 else
                     echo -e "      ${RED_BRIGHT}Pas de scores pour le moment.${RESET}"
                 fi
                 echo ""
-                echo "      Appuyez sur Entree pour revenir..."
+                echo -e "${BOLD}${GRAY}      Appuyez sur Entree pour revenir...${RESET}"
                 read
             elif [ "$histo" = '2' ]; then
-                if [ -f MasterLin/historique_duel.txt ]; then
+                if [ -f /var/log/masterlin//historique_duel.txt ]; then
                     echo -e "      ${CYAN_LIGHT}--- SCORES DUEL ---${RESET}"
-                    cat MasterLin/historique_duel.txt
+                    cat /var/log/masterlin/historique_duel.txt
                 else
                     echo -e "      ${RED_BRIGHT}Pas de duel pour le moment.${RESET}"
                 fi
                 echo ""
-                echo "      Appuyez sur Entree pour revenir..."
+                echo -e "${BOLD}${GRAY}      Appuyez sur Entree pour revenir...${RESET}"
                 read
             elif [ "$histo" = '3' ]; then
                 # Option 3 : Quitte proprement ce sous-menu pour retourner au menu principal
@@ -320,16 +342,17 @@ menu_principal()
         elif [ "$choix" = '4' ]; then
         	echo " "
         	echo -e "      ${BOLD}${GOLD_AMBER}Au revoir!${RESET}"
-            	sleep 4
+            	sleep 3
             	clear
-            	exit 0
+            	if [ -n "$TMUX" ]; then
+                  # On tue la session courante proprement
+                  tmux kill-session -t "MasterLin"
+                fi
+                arreter_ecoute "$PORT1"
+                arreter_ecoute "$PORT2"
+		exit 0
         fi
     done
-    
-   if [ -n "$pid_msg1" ]; then
-        kill "$pid_msg1" 2>/dev/null
-        wait "$pid_msg1" 2>/dev/null
-    fi
 }
 
 quizz()
@@ -365,6 +388,7 @@ quizz()
     echo ""
     sleep 1
     clear
+    echo ""
     echo -e "${QUIZ_BLUE}╔════════════════════════════════════════════════════════════════════╗${RESET}"
     echo -e "${QUIZ_BLUE}║${RESET} ${BANNER_QUIZ}      Thème: $Theme_actuel                                  ${RESET} ${QUIZ_BLUE}║${RESET}"
     echo -e "${QUIZ_BLUE}║${RESET} ${BANNER_QUIZ}      Niveau: $niveau                                             ${RESET} ${QUIZ_BLUE}║${RESET}"
@@ -441,8 +465,17 @@ quizz()
     done < <(grep -v '^#' "$fichier_question" | grep -v '^[[:space:]]*$' | shuf | head -n $total)
 
     resultat "$score" "$total" "$niveau"
+    
 }
 
+echo "$(date '+%d/%m/%Y %H:%M') Lancement de MasterLin par $USER" >> /var/log/masterlin/masterlin.connexion
 accueil
+
+envoie_annonce &
+pid_envoie_annonce=$!
+ecoute_annonce &
+pid_annonce=$!
+
 menu_principal
+
 

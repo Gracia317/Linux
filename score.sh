@@ -80,7 +80,8 @@ resultat()
         
     debloque_niv "$repere" "$niveau_affiche" "$ratio"
 
-    echo "$(date '+%d/%m/%Y %H:%M') | $prenom | $Theme_actuel | $niveau_affiche | $ratio" >> MasterLin/historique.txt
+    echo "$(date '+%d/%m/%Y %H:%M') | $prenom | $Theme_actuel | $niveau_affiche | $ratio" >> /var/log/masterlin/historique.txt
+    
     
     echo ""
     echo -e "  ${TXT_VIOLET}⎋${CLR_RESET} ${CLR_DIM}Appuyer sur Entrer pour revenir...${CLR_RESET}"
@@ -89,7 +90,7 @@ resultat()
 
 fic()
 {
-    echo "MasterLin/progression_${prenom}.txt"
+    echo "/home/$USER/.masterlin/progression_${prenom}.txt"
 }
 
 init_progression() 
@@ -99,8 +100,9 @@ init_progression()
 
     if [ ! -f "$fichier" ]; then
         touch "$fichier"
-        printf '%s\n' "gestion_niveau1=0" "gestion_niveau2=verrou" "gestion_niveau3=verrou" "texte_niveau1=0" "texte_niveau2=verrou" "texte_niveau3=verrou" "droits_niveau1=0" "droits_niveau2=verrou" "droits_niveau3=verrou" "processus_niveau1=0" "processus_niveau2=verrou" "processus_niveau3=verrou" > "$fichier"
         chmod 600 "$fichier"
+        printf '%s\n' "gestion_niveau1=0" "gestion_niveau2=verrou" "gestion_niveau3=verrou" "texte_niveau1=0" "texte_niveau2=verrou" "texte_niveau3=verrou" "droits_niveau1=0" "droits_niveau2=verrou" "droits_niveau3=verrou" "processus_niveau1=0" "processus_niveau2=verrou" "processus_niveau3=verrou" > "$fichier"
+        chmod 400 "$fichier"
     fi
 }
 

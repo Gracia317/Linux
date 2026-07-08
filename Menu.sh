@@ -1,7 +1,4 @@
 #!/bin/bash
-source ./assist.sh
-source ./duel.sh
-source ./score.sh
 
 RESET="\033[0m"
 BOLD="\033[1m"
@@ -47,8 +44,12 @@ while true; do
     echo -e "    ${BOLD}${WHITE}[3]${RESET}    ${CORAL}Mode duel${RESET}      ${DIM}${GRAY}— Affronter un autre joueur ${RESET}"
     echo -e "  ${CORAL}╚═══════════════════════════════════════════════════════════════╝${RESET}"
     echo ""
+    echo -e "  ${GOLD_AMBER}╔═══════════════════════════════════════════════════════════════╗${RESET}"
+    echo -e "    ${BOLD}${WHITE}[4]${RESET}    ${GOLD_AMBER}Défi du jour${RESET}   ${DIM}${GRAY}—  Pratiquer sur le système quotidiennement${RESET}"
+    echo -e "  ${GOLD_AMBER}╚═══════════════════════════════════════════════════════════════╝${RESET}"
+    echo ""
     echo -e "  ${GRAY}╔═══════════════════════════════════════════════════════════════╗${RESET}"
-    echo -e "    ${BOLD}${WHITE}[4]${RESET}    ${GRAY}Retour menu${RESET}    ${DIM}${GRAY}— Revenir au tableau de bord principal${RESET}"
+    echo -e "    ${BOLD}${WHITE}[5]${RESET}    ${GRAY}Retour menu${RESET}    ${DIM}${GRAY}— Revenir au tableau de bord principal${RESET}"
     echo -e "  ${GRAY}╚═══════════════════════════════════════════════════════════════╝${RESET}"
     echo ""
     echo -e " ${CORAL}◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤${RESET}"
@@ -58,17 +59,23 @@ while true; do
 
     if [ "$choix_mode" = '1' ]; then
         clear
+        logger -t masterlin -p local0.info "L'utilisateur $USER a choisi le Mode Solo"
         modules
         break
     elif [ "$choix_mode" = '2' ]; then
         clear
-        modules_as
+        logger -t masterlin -p local0.info "L'utilisateur $USER a choisi le Mode Assistance"
+        assist
         break
     elif [ "$choix_mode" = '3' ]; then
         clear
         affiche_duel
         break
     elif [ "$choix_mode" = '4' ]; then
+        clear
+        defi
+        break
+    elif [ "$choix_mode" = '5' ]; then
         return 0
     else
 
@@ -216,7 +223,7 @@ while true; do
             local s2
             s2=$(lire_score "$repere" "niveau2")
             echo "   Terminez le niveau 2 avec au moins ${minimum}%"
-            echo "   Votre meilleur score niveau 2 : ${s2}%"s
+            echo "   Votre meilleur score niveau 2 : ${s2}%"
 	fi
         
         sleep 3
