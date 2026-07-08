@@ -129,3 +129,6 @@ Ce projet a été conçu pour un usage pédagogique en salle de TP ou sur poste 
 ```bash
 sudo dpkg -r masterlin
 ```
+## Pour récupérer le .deb
+
+Veuillez contacter un de nous 4 😆
